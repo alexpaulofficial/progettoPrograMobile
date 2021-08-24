@@ -22,4 +22,9 @@
             android:name="com.example.provamap.ui.slideshow.SlideshowFragment"
             android:label="@string/menu_slideshow"
             tools:layout="@layout/fragment_slideshow"/>
+    <fragment
+            android:id="@+id/nav_place"
+            android:name="com.example.provamap.ui.place.PlaceFragment"
+            android:label="Place"
+            tools:layout="@layout/fragment_place"/>
 </navigation>

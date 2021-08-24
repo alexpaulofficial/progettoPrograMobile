@@ -17,6 +17,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.provamap.MainActivity
 import com.example.provamap.R
+import com.example.provamap.ui.place.PlaceFragment
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -27,7 +30,8 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 
 class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
-    GoogleMap.OnMyLocationClickListener, ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnMarkerClickListener {
+    GoogleMap.OnMyLocationClickListener, ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnMarkerClickListener,
+    GoogleMap.OnInfoWindowClickListener {
 
 
     private val MY_PERMISSION_FINE_LOCATION = 101
@@ -36,6 +40,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
     private var permissionDenied = false
     private lateinit var mMap : GoogleMap
     private var mapReady = false
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,6 +51,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
             ViewModelProvider(this).get(HomeViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_home, container, false)
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.context!!.applicationContext)
         mapFragment.getMapAsync(this)
         mapFragment.getMapAsync {
             googleMap -> mMap = googleMap
@@ -55,11 +61,24 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
     }
 
     override fun onMapReady(p0: GoogleMap) {
-        p0.addMarker(
-            MarkerOptions().position(LatLng(42.0, 0.0)).title("Marker")
-        )
+        p0.setOnInfoWindowClickListener(this)
+        var lastLocation: Location? = Location ("")
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener {location : Location? ->
+                // Got last known location. In some rare situations this can be null.
+                lastLocation!!.latitude = location!!.latitude
+                lastLocation!!.longitude = location!!.longitude
+            }
 
-        p0.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(43.5171122, 13.2253359), 17f))
+        p0.addMarker(
+            MarkerOptions().position(LatLng(43.5171122, 13.2253359)).title("Marker").snippet("Population: 4,137,400")
+        )
+        if (lastLocation != null) {
+            p0.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lastLocation!!.latitude, lastLocation!!.longitude), 17f))
+        }
+        else {
+            p0.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(43.5171122, 13.2253359), 17f))
+        }
         p0.setOnMyLocationButtonClickListener(this)
         p0.setOnMyLocationClickListener(this)
         enableMyLocation()
@@ -77,6 +96,12 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
     }
     override fun onMarkerClick(p0: Marker?) = false
 
+    override fun onInfoWindowClick(marker: Marker) {
+        val transaction = activity?.supportFragmentManager!!.beginTransaction()
+        transaction.replace(R.id.mapFragment, PlaceFragment())
+        transaction.disallowAddToBackStack()
+        transaction.commit()
+    }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
@@ -130,5 +155,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
          */
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
+
 
 }
