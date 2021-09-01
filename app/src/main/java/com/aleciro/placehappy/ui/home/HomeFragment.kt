@@ -69,12 +69,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         p0.addMarker(
             MarkerOptions().position(LatLng(43.5171122, 13.2253359)).title("Marker").snippet("Population: 4,137,400")
         )
-        if (lastLocation != null) {
-            p0.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(lastLocation!!.latitude, lastLocation!!.longitude), 17f))
-        }
-        else {
-            p0.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(43.5171122, 13.2253359), 17f))
-        }
+        p0.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(43.5250291, 13.231723), 14f))
         p0.setOnMyLocationButtonClickListener(this)
         p0.setOnMyLocationClickListener(this)
         enableMyLocation()

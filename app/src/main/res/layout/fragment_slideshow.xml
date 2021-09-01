@@ -19,5 +19,18 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintVertical_bias="0.336"
+            app:layout_constraintBottom_toTopOf="@+id/buttonLogout"/>
+
+    <Button
+            android:text="Logout"
+            android:layout_width="157dp"
+            android:layout_height="51dp"
+            android:id="@+id/buttonLogout"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginBottom="188dp"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
