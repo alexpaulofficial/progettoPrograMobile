@@ -27,4 +27,10 @@
     <string name="cognome">Cognome</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
+    <string name="channel_name">Placy Happy Notification</string>
+    <string name="channel_description">Notifiche vicinanza luogo</string>
+    <string name="title_activity_bottom_navigation">MainActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
 </resources>

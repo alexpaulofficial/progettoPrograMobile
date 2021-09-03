@@ -1,8 +1,13 @@
 package com.aleciro.placehappy
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -12,6 +17,8 @@ class FirstActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
         setContentView(R.layout.activity_first)
         val preferences = getSharedPreferences("login", MODE_PRIVATE)
         if (preferences.getBoolean("firstrun", true)) {

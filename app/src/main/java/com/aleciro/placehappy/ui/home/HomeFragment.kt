@@ -10,9 +10,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.aleciro.placehappy.MainActivity
 import com.aleciro.placehappy.R
 import com.aleciro.placehappy.ui.place.PlaceFragment
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -57,14 +59,15 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
     }
 
     override fun onMapReady(p0: GoogleMap) {
+        // val xxx: MainActivity = activity as MainActivity
         p0.setOnInfoWindowClickListener(this)
-        var lastLocation: Location? = Location ("")
+        /*var lastLocation: Location? = Location ("")
         fusedLocationClient.lastLocation
             .addOnSuccessListener {location : Location? ->
                 // Got last known location. In some rare situations this can be null.
                 lastLocation!!.latitude = location!!.latitude
                 lastLocation!!.longitude = location!!.longitude
-            }
+            }*/
 
         p0.addMarker(
             MarkerOptions().position(LatLng(43.5171122, 13.2253359)).title("Marker").snippet("Population: 4,137,400")
@@ -73,6 +76,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         p0.setOnMyLocationButtonClickListener(this)
         p0.setOnMyLocationClickListener(this)
         enableMyLocation()
+
+        with(NotificationManagerCompat.from(this.context!!)) {
+            // notificationId is a unique int for each notification that you must define
+            // notify(1, xxx.builder.build())
+        }
 
         if (ActivityCompat.checkSelfPermission(this.context!!.applicationContext,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
