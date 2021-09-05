@@ -7,13 +7,13 @@
         android:title="@string/title_home"/>
 
     <item
-        android:id="@+id/navigation_dashboard"
-        android:icon="@drawable/fui_ic_yahoo_24dp"
-        android:title="Account"/>
+        android:id="@+id/luoghi"
+        android:icon="@drawable/places_icon"
+        android:title="Tutti i luoghi"/>
 
     <item
-        android:id="@+id/navigation_notifications"
-        android:icon="@drawable/ic_notifications_black_24dp"
-        android:title="@string/title_notifications"/>
+        android:id="@+id/tag"
+        android:icon="@drawable/tags_icon"
+        android:title="Tutti i tag"/>
 
 </menu>

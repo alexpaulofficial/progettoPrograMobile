@@ -12,13 +12,13 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
+        android:id="@+id/luoghi"
         android:name="com.aleciro.placehappy.ui.slideshow.SlideshowFragment"
         android:label="Account"
         tools:layout="@layout/fragment_slideshow" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
+        android:id="@+id/tag"
         android:name="com.aleciro.placehappy.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />

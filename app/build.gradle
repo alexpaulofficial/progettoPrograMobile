@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'com.google.gms.google-services'
     id("com.google.secrets_gradle_plugin") version "0.6"
+    id 'kotlin-kapt'
 }
 
 android {
@@ -66,4 +67,10 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation("androidx.core:core-ktx:1.6.0")
     implementation 'com.firebaseui:firebase-ui-auth:7.2.0'
+
+    //room database
+    implementation "androidx.room:room-runtime:2.3.0"
+    implementation 'androidx.room:room-ktx:2.3.0'
+    kapt "androidx.room:room-compiler:2.3.0"
+    testImplementation "androidx.room:room-testing:2.3.0"
 }
