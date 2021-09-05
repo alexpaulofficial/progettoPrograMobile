@@ -31,11 +31,6 @@
 
         </activity>
         <activity
-            android:name=".MainActivity"
-            android:label="Main Part"
-            android:theme="@style/Theme.PlaceHappy.NoActionBar" >
-        </activity>
-        <activity
             android:name=".LoginActivity"
             android:label="Login Part"
             android:theme="@style/Theme.PlaceHappy.NoActionBar" >

@@ -3,6 +3,7 @@ package com.aleciro.placehappy
 import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -20,7 +21,7 @@ private lateinit var binding: ActivityBottomNavigationBinding
      setContentView(binding.root)
 
         val navView: BottomNavigationView = binding.navView
-
+        // val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navController = findNavController(R.id.nav_host_fragment_activity_bottom_navigation)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.

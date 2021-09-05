@@ -14,7 +14,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.aleciro.placehappy.MainActivity
 import com.aleciro.placehappy.R
 import com.aleciro.placehappy.ui.place.PlaceFragment
 import com.google.android.gms.location.FusedLocationProviderClient
