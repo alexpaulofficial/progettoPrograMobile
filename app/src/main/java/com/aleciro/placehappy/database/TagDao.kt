@@ -11,7 +11,7 @@ interface TagDao {
      suspend fun getPlacesByTag(name: String) : MutableList<Tag>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-     suspend fun insert(vararg tag: Tag)
+     suspend fun insert(tags: Array<Tag>)
 
     @Update
      suspend fun update(tag: Tag)

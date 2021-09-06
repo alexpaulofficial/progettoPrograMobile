@@ -14,8 +14,11 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment.findNavController
+import androidx.navigation.fragment.findNavController
+import com.aleciro.placehappy.PlaceFragment
 import com.aleciro.placehappy.R
-import com.aleciro.placehappy.ui.place.PlaceFragment
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -48,7 +51,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
             ViewModelProvider(this).get(HomeViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_home, container, false)
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.context!!.applicationContext)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.requireContext().applicationContext)
         mapFragment.getMapAsync(this)
         mapFragment.getMapAsync {
             googleMap -> mMap = googleMap
@@ -76,12 +79,9 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         p0.setOnMyLocationClickListener(this)
         enableMyLocation()
 
-        with(NotificationManagerCompat.from(this.context!!)) {
-            // notificationId is a unique int for each notification that you must define
-            // notify(1, xxx.builder.build())
-        }
 
-        if (ActivityCompat.checkSelfPermission(this.context!!.applicationContext,
+
+        if (ActivityCompat.checkSelfPermission(this.requireContext().applicationContext,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             p0.isMyLocationEnabled = true
         }
@@ -95,10 +95,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
     override fun onMarkerClick(p0: Marker?) = false
 
     override fun onInfoWindowClick(marker: Marker) {
-        val transaction = activity?.supportFragmentManager!!.beginTransaction()
+        /*val transaction = activity?.supportFragmentManager!!.beginTransaction()
         transaction.replace(R.id.mapFragment, PlaceFragment())
         transaction.disallowAddToBackStack()
-        transaction.commit()
+        transaction.commit()*/
+        this.findNavController().navigate(R.id.action_navigation_home_to_placeFragment)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -106,14 +107,14 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
 
         when (requestCode) {
             MY_PERMISSION_FINE_LOCATION -> if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {//permission to access location grant
-                if (ActivityCompat.checkSelfPermission(this.context!!.applicationContext,
+                if (ActivityCompat.checkSelfPermission(this.requireContext().applicationContext,
                         Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     mMap.isMyLocationEnabled = true
                 }
             }
             //permission to access location denied
             else {
-                Toast.makeText(this.context!!.applicationContext, "This app requires location permissions to be granted", Toast.LENGTH_LONG).show()
+                Toast.makeText(this.requireContext().applicationContext, "This app requires location permissions to be granted", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -122,13 +123,13 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
      */
     private fun enableMyLocation() {
         if (!::mMap.isInitialized) return
-        if (ContextCompat.checkSelfPermission(this.context!!.applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)
+        if (ContextCompat.checkSelfPermission(this.requireContext().applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)
             == PackageManager.PERMISSION_GRANTED) {
             mMap.isMyLocationEnabled = true
         } else {
             // Permission to access the location is missing. Show rationale and request permission
             ActivityCompat.requestPermissions(
-                this.activity!!.parent, Array<String>(1){Manifest.permission.ACCESS_FINE_LOCATION},
+                this.requireActivity().parent, Array<String>(1){Manifest.permission.ACCESS_FINE_LOCATION},
                 LOCATION_PERMISSION_REQUEST_CODE
             )
 
@@ -136,14 +137,14 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
     }
 
     override fun onMyLocationButtonClick(): Boolean {
-        Toast.makeText(this.context!!.applicationContext, "MyLocation button clicked", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this.requireContext().applicationContext, "MyLocation button clicked", Toast.LENGTH_SHORT).show()
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         return false
     }
 
     override fun onMyLocationClick(location: Location) {
-        Toast.makeText(this.context!!.applicationContext, "Current location:\n$location", Toast.LENGTH_LONG).show()
+        Toast.makeText(this.requireContext().applicationContext, "Current location:\n$location", Toast.LENGTH_LONG).show()
     }
 
     companion object {

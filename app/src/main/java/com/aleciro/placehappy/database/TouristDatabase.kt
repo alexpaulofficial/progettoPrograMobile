@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 
-@Database(entities = [Tag::class, Place::class], version = 2)
+@Database(entities = [Tag::class, Place::class], version = 3)
 abstract class TouristDatabase : RoomDatabase() {
     abstract fun tagDao(): TagDao
     abstract fun placeDao(): PlaceDao

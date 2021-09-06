@@ -9,11 +9,11 @@
     <item
         android:id="@+id/luoghi"
         android:icon="@drawable/places_icon"
-        android:title="Tutti i luoghi"/>
+        android:title="Luoghi"/>
 
     <item
         android:id="@+id/tag"
         android:icon="@drawable/tags_icon"
-        android:title="Tutti i tag"/>
+        android:title="Tag"/>
 
 </menu>

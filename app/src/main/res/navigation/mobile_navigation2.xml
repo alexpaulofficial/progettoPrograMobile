@@ -9,17 +9,41 @@
         android:id="@+id/navigation_home"
         android:name="com.aleciro.placehappy.ui.home.HomeFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_navigation_home_to_placeFragment"
+            app:destination="@id/placeFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/luoghi"
-        android:name="com.aleciro.placehappy.ui.slideshow.SlideshowFragment"
-        android:label="Account"
-        tools:layout="@layout/fragment_slideshow" />
+        android:name="com.aleciro.placehappy.PlacesFragment"
+        android:label="Luoghi"
+        tools:layout="@layout/fragment_places" >
+        <action
+            android:id="@+id/action_luoghi_to_placeFragment"
+            app:destination="@id/placeFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/tag"
-        android:name="com.aleciro.placehappy.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:name="com.aleciro.placehappy.TagsFragment"
+        android:label="Tag"
+        tools:layout="@layout/fragment_tags" >
+        <action
+            android:id="@+id/action_tag_to_luoghi"
+            app:destination="@id/luoghi" />
+    </fragment>
+    <fragment
+        android:id="@+id/placeFragment"
+        android:name="com.aleciro.placehappy.PlaceFragment"
+        android:label="Informazioni sul luogo"
+        tools:layout="@layout/fragment_place">
+
+    <argument
+        android:name="nomeLuogo"
+        app:argType="string"
+        android:defaultValue=" " />
+
+    </fragment>
 </navigation>

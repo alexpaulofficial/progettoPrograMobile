@@ -33,4 +33,15 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+    <string name="elenco_luoghi">elenco luoghi</string>
+    <string name="elenco_tag">elenco tag</string>
+    <string name="piazza_repubblica">piazza_repubblica</string>
+    <string name="hemingway">hemingway</string>
+    <string name="pizzeria_da_ciro">pizzeria_da_ciro</string>
+    <string name="corso_matteotti">corso_matteotti</string>
+    <string name="casa_mia">casa_mia</string>
 </resources>
