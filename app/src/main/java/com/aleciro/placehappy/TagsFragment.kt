@@ -33,7 +33,7 @@ class TagsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         /*viewModel.addTag(arrayOf(Tag("Eventi", "Piazza della Repubblica"),Tag("Eventi", "Piazza della Repubblica"),
             Tag("Musica", "Bar Hemingway"), Tag("Drink", "Bar Hemingway"),
-            Tag("Eventi", "Casa mia"), Tag("Food", "Pizzeria da Ciro")))*/
+            Tag("Eventi", "Casa mia"), Tag("Food", "Pizzeria da Ciro"))) */
 
         lifecycleScope.launch{
            val listatag : MutableList<String> = viewModel.getAllTags()

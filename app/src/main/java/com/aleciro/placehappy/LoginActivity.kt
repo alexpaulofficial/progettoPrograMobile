@@ -32,7 +32,7 @@ class LoginActivity: AppCompatActivity() {
         var textEmail = findViewById<TextInputEditText>(R.id.text_email)
         var textPassword = findViewById<TextInputEditText>(R.id.text_password)
 
-        btnLogin.setOnClickListener {
+       btnLogin.setOnClickListener {
 
             val email = textEmail.text.toString()
             val password = textPassword.text.toString()

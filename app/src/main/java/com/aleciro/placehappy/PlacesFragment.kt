@@ -55,8 +55,8 @@ class PlacesFragment : Fragment() {
                         " quello che volete completamente gratis, levatevi le scarpe prima di entrare però" ,"via saffi 8", 332.13, 21.254, casa_mia),
 
                 Place("Pizzeria da Ciro", "la vera pizza napoletana","pizza napoletana come piace" +
-                        " al padrone di casa, Ciro, ormai ottantenne ma ancora con molta voglia e passione" ,"via bellissima", 32.134, 21.3242, pizzeria_da_ciro)))*/
-
+                        " al padrone di casa, Ciro, ormai ottantenne ma ancora con molta voglia e passione" ,"via bellissima", 32.134, 21.3242, pizzeria_da_ciro)))
+            */
 
 
 
