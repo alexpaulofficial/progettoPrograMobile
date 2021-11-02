@@ -31,12 +31,22 @@ class TagsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        /*viewModel.addTag(arrayOf(Tag("Eventi", "Piazza della Repubblica"),Tag("Eventi", "Piazza della Repubblica"),
-            Tag("Musica", "Bar Hemingway"), Tag("Drink", "Bar Hemingway"),
-            Tag("Eventi", "Casa mia"), Tag("Food", "Pizzeria da Ciro"))) */
 
         lifecycleScope.launch{
-           val listatag : MutableList<String> = viewModel.getAllTags()
+            val listatag : MutableList<String> = viewModel.getAllTags()
+            if (listatag== null) {
+                viewModel.addTag(
+                    arrayOf(
+                        Tag("Eventi", "Piazza della Repubblica"),
+                        Tag("Eventi", "Piazza della Repubblica"),
+                        Tag("Musica", "Bar Hemingway"),
+                        Tag("Drink", "Bar Hemingway"),
+                        Tag("Eventi", "Casa mia"),
+                        Tag("Food", "Pizzeria da Ciro")
+                    )
+                )
+            }
+
 
 
             val rv: RecyclerView = view.findViewById(R.id.recyclerTag)
