@@ -40,7 +40,7 @@ class PlacesFragment : Fragment() {
 
         lifecycleScope.launch{
             val listaluoghi: MutableList<Place> = viewModel.getAllPlaces()
-            if (listaluoghi== null) {
+            if (listaluoghi.size==0) {
                 val piazza_repubblica = getString(R.string.piazza_repubblica)
                 val hemingway = getString(R.string.hemingway)
                 val corso_matteotti =  getString(R.string.corso_matteotti)

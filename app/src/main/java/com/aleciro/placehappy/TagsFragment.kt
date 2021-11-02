@@ -34,7 +34,7 @@ class TagsFragment : Fragment() {
 
         lifecycleScope.launch{
             val listatag : MutableList<String> = viewModel.getAllTags()
-            if (listatag== null) {
+            if (listatag.size==0) {
                 viewModel.addTag(
                     arrayOf(
                         Tag("Eventi", "Piazza della Repubblica"),
