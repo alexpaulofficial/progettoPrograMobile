@@ -32,20 +32,13 @@ class TagsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        lifecycleScope.launch{
-            val listatag : MutableList<String> = viewModel.getAllTags()
-            if (listatag.size==0) {
-                viewModel.addTag(
-                    arrayOf(
-                        Tag("Eventi", "Piazza della Repubblica"),
-                        Tag("Eventi", "Piazza della Repubblica"),
-                        Tag("Musica", "Bar Hemingway"),
-                        Tag("Drink", "Bar Hemingway"),
-                        Tag("Eventi", "Casa mia"),
-                        Tag("Food", "Pizzeria da Ciro")
-                    )
-                )
-            }
+
+
+        lifecycleScope.launch {
+            viewModel.getAllTags()
+            val listatag : MutableList<String> = viewModel.tagsList
+
+
 
 
 

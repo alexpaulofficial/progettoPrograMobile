@@ -11,10 +11,21 @@ class TouristViewModel(app:Application) : AndroidViewModel(app) {
 
     private val placeDao = TouristDatabase.getInstance(app).placeDao()
     private val tagDao = TouristDatabase.getInstance(app).tagDao()
+    var placesList : MutableList<Place> = mutableListOf()
+    var tagsList : MutableList<String> = mutableListOf()
 
 
 
-    suspend fun getAllPlaces(): MutableList<Place> = placeDao.getAll()
+
+
+    suspend fun getAllPlaces() {
+
+        placesList = placeDao.getAll()
+
+    }
+
+
+
     fun addPlace(places : Array<Place>) {
         viewModelScope.launch {
             placeDao.insert(places)
@@ -44,7 +55,7 @@ class TouristViewModel(app:Application) : AndroidViewModel(app) {
     }
 
 
-    suspend fun getAllTags() : MutableList<String> {
+    suspend fun getAllTags()  {
         val tags = tagDao.getAll()
         val tagNames : MutableList<String> = mutableListOf()
         for (tag in tags) {
@@ -53,7 +64,7 @@ class TouristViewModel(app:Application) : AndroidViewModel(app) {
             }
 
         }
-        return tagNames
+        tagsList = tagNames
     }
 
 

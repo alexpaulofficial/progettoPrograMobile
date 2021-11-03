@@ -13,12 +13,17 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.navigation.fragment.findNavController
 import com.aleciro.placehappy.PlaceFragment
 import com.aleciro.placehappy.R
+import com.aleciro.placehappy.database.Place
+import com.aleciro.placehappy.database.Tag
+import com.aleciro.placehappy.viewmodel.TouristViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -28,6 +33,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
     GoogleMap.OnMyLocationClickListener, ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnMarkerClickListener,
@@ -35,6 +41,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
 
 
     private val MY_PERMISSION_FINE_LOCATION = 101
+    val viewModel: TouristViewModel by viewModels()
 
     private lateinit var homeViewModel: HomeViewModel
     private var permissionDenied = false
@@ -58,6 +65,79 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
             mapReady = true
         }
         return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val piazza_repubblica = getString(R.string.piazza_repubblica)
+        val hemingway = getString(R.string.hemingway)
+        val corso_matteotti = getString(R.string.corso_matteotti)
+        val casa_mia = getString(R.string.casa_mia)
+        val pizzeria_da_ciro = getString(R.string.pizzeria_da_ciro)
+        viewModel.addPlace(
+            arrayOf(
+                Place(
+                    "Piazza della Repubblica",
+                    "una bellissima piazza, veramente bella puoi" +
+                            " farci tutto quello che vuoi, oggi ci hanno anche messo l'obelisco che" +
+                            " prima stava dall'altra parte",
+                    "Piazza bellissima ora anche con l'obelisco che prima stava in Piazza Pergolesi",
+                    "via saffi",
+                    332.1,
+                    2132.42,
+                    piazza_repubblica
+                ),
+
+                Place(
+                    "Bar Hemingway", "drink ti ubriachi", "Drink buoni di vari gusti, tavolini" +
+                            "con possibilità di sedersi", "via bella", 3322.41, 21.23, hemingway
+                ),
+
+                Place(
+                    "Corso Matteotti",
+                    "qualche vasca per sgranchire le gambe",
+                    "passeggiate in questo" +
+                            " bellissimo corso, ora sta venendo rinnovato e per fine anno sarà bellissimo",
+                    "corso matteotti",
+                    32.1,
+                    21.24,
+                    corso_matteotti
+                ),
+
+                Place(
+                    "Casa mia",
+                    "siete tutti i benvenuti",
+                    "casa molto accogliente, musica e tutto" +
+                            " quello che volete completamente gratis, levatevi le scarpe prima di entrare però",
+                    "via saffi 8",
+                    332.13,
+                    21.254,
+                    casa_mia
+                ),
+
+                Place(
+                    "Pizzeria da Ciro",
+                    "la vera pizza napoletana",
+                    "pizza napoletana come piace" +
+                            " al padrone di casa, Ciro, ormai ottantenne ma ancora con molta voglia e passione",
+                    "via bellissima",
+                    32.134,
+                    21.3242,
+                    pizzeria_da_ciro
+                )
+            )
+        )
+        viewModel.addTag(
+            arrayOf(
+                Tag("Eventi", "Piazza della Repubblica"),
+                Tag("Eventi", "Piazza della Repubblica"),
+                Tag("Musica", "Bar Hemingway"),
+                Tag("Drink", "Bar Hemingway"),
+                Tag("Eventi", "Casa mia"),
+                Tag("Food", "Pizzeria da Ciro")
+            )
+        )
+
     }
 
     override fun onMapReady(p0: GoogleMap) {
