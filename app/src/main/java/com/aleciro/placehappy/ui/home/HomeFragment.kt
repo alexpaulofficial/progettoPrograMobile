@@ -1,10 +1,16 @@
 package com.aleciro.placehappy.ui.home
 
 import android.Manifest
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +29,7 @@ import com.aleciro.placehappy.PlaceFragment
 import com.aleciro.placehappy.R
 import com.aleciro.placehappy.database.Place
 import com.aleciro.placehappy.database.Tag
+import com.aleciro.placehappy.notifications.AlertReceiver
 import com.aleciro.placehappy.viewmodel.TouristViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -59,16 +66,14 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         val root = inflater.inflate(R.layout.fragment_home, container, false)
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.requireContext().applicationContext)
+
+
         mapFragment.getMapAsync(this)
         mapFragment.getMapAsync {
             googleMap -> mMap = googleMap
             mapReady = true
         }
-        return root
-    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         val piazza_repubblica = getString(R.string.piazza_repubblica)
         val hemingway = getString(R.string.hemingway)
         val corso_matteotti = getString(R.string.corso_matteotti)
@@ -83,8 +88,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
                             " prima stava dall'altra parte",
                     "Piazza bellissima ora anche con l'obelisco che prima stava in Piazza Pergolesi",
                     "via saffi",
-                    332.1,
-                    2132.42,
+                    43.5186806,
+                    13.2266059,
                     piazza_repubblica
                 ),
 
@@ -110,8 +115,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
                     "casa molto accogliente, musica e tutto" +
                             " quello che volete completamente gratis, levatevi le scarpe prima di entrare però",
                     "via saffi 8",
-                    332.13,
-                    21.254,
+                    43.5188215,
+                    13.2256371,
                     casa_mia
                 ),
 
@@ -138,22 +143,63 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
             )
         )
 
+        return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        //Notifications
+        val minutes = 1
+
+        var alarmMgr: AlarmManager?
+        alarmMgr = this.context!!.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        var primaryIntent = Intent(this.context, AlertReceiver::class.java)
+
+        var luoghiNotifica = Bundle()
+        //var placeVuoto = Place("","","","",0.1,0.1,"")
+        var listaluoghi = mutableListOf<Place>()
+        lifecycleScope.launch {
+            viewModel.getAllPlaces()
+            listaluoghi = viewModel.placesList
+        var i = 0
+        for (luogo in listaluoghi) {
+            luoghiNotifica.putString(i.toString() + "NAME", luogo.name)
+            luoghiNotifica.putDouble(i.toString() + "LAT", luogo.latitude)
+            luoghiNotifica.putDouble(i.toString() + "LONG", luogo.longitude)
+            /*var arrayCoordinate = DoubleArray(2)
+            arrayCoordinate[0] = luogo.latitude
+            arrayCoordinate[0] = luogo.longitude
+            luoghiNotifica.putDoubleArray(luogo.name, arrayCoordinate)*/
+            i++
+        }
+        Log.d("BUNDLE", "BundleLuoghi = " + luoghiNotifica.toString())
+        primaryIntent.putExtra("Luoghi", luoghiNotifica)
+        var pendingIntent = primaryIntent.let { intent ->
+            PendingIntent.getBroadcast(context, 0, intent.putExtra("Luoghi", luoghiNotifica), 0)
+        }
+        alarmMgr?.setInexactRepeating(
+            AlarmManager.ELAPSED_REALTIME,
+            SystemClock.elapsedRealtime() + minutes * 60 * 1000,
+            (minutes * 60 * 1000).toLong(),
+            pendingIntent
+
+        )
+    }
     }
 
     override fun onMapReady(p0: GoogleMap) {
         // val xxx: MainActivity = activity as MainActivity
         p0.setOnInfoWindowClickListener(this)
-        /*var lastLocation: Location? = Location ("")
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener {location : Location? ->
-                // Got last known location. In some rare situations this can be null.
-                lastLocation!!.latitude = location!!.latitude
-                lastLocation!!.longitude = location!!.longitude
-            }*/
+        lifecycleScope.launch {
+            viewModel.getAllPlaces()
+            val listaluoghi: MutableList<Place> = viewModel.placesList
+            for (luogo in listaluoghi) {
+                p0.addMarker(
+                    MarkerOptions().position(LatLng(luogo.latitude, luogo.longitude)).title(luogo.name)
+                )
+            }
 
-        p0.addMarker(
-            MarkerOptions().position(LatLng(43.5171122, 13.2253359)).title("Marker").snippet("Population: 4,137,400")
-        )
+        }
         p0.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(43.5250291, 13.231723), 14f))
         p0.setOnMyLocationButtonClickListener(this)
         p0.setOnMyLocationClickListener(this)
@@ -175,11 +221,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
     override fun onMarkerClick(p0: Marker?) = false
 
     override fun onInfoWindowClick(marker: Marker) {
-        /*val transaction = activity?.supportFragmentManager!!.beginTransaction()
-        transaction.replace(R.id.mapFragment, PlaceFragment())
-        transaction.disallowAddToBackStack()
-        transaction.commit()*/
-        this.findNavController().navigate(R.id.action_navigation_home_to_placeFragment)
+        val action = HomeFragmentDirections.actionNavigationHomeToPlaceFragment(marker.title)
+        this.findNavController().navigate(action)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
