@@ -32,7 +32,7 @@ data class Place  (
 )
 data class Tag (
 
-    val tagName : String,
+    val tagName: String,
     val place: String
 
 )

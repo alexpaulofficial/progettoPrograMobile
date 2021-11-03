@@ -4,10 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavArgs
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.aleciro.placehappy.database.Place
@@ -22,6 +25,9 @@ class PlacesFragment : Fragment() {
 
 
     val viewModel: TouristViewModel by viewModels()
+
+    val args : PlacesFragmentArgs by navArgs()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -33,9 +39,26 @@ class PlacesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val tag = args.nomeTag
+        if (tag!="default"){
+            var titolo =view.findViewById<TextView>(R.id.textView)
+            titolo.text = "Lista dei luoghi con tag #$tag"
+
+
+        }
+
         lifecycleScope.launch {
-            viewModel.getAllPlaces()
-            val listaluoghi: MutableList<Place> = viewModel.placesList
+            var listaluoghi: MutableList<Place> = mutableListOf()
+            if (tag!= "default")
+            {
+                viewModel.viewPlacesByTag(tag)
+                listaluoghi = viewModel.placesByTag
+
+            }
+            else {
+                viewModel.getAllPlaces()
+                listaluoghi = viewModel.placesList
+            }
 
 
             val rv: RecyclerView = view.findViewById(R.id.recyclerView)

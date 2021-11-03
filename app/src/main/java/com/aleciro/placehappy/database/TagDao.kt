@@ -7,7 +7,7 @@ interface TagDao {
     @Query("SELECT * FROM tags")
     suspend fun getAll(): MutableList<Tag>
 
-    @Query("SELECT * FROM tags WHERE tagName = :name")
+    @Query("SELECT * FROM tags WHERE tagName=:name")
      suspend fun getPlacesByTag(name: String) : MutableList<Tag>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

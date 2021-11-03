@@ -23,6 +23,10 @@
         <action
             android:id="@+id/action_luoghi_to_placeFragment"
             app:destination="@id/placeFragment" />
+        <argument
+            android:name="nomeTag"
+            app:argType="string"
+            android:defaultValue="default" />
     </fragment>
 
     <fragment
@@ -43,7 +47,7 @@
     <argument
         android:name="nomeLuogo"
         app:argType="string"
-        android:defaultValue=" " />
+        android:defaultValue="default" />
 
     </fragment>
 </navigation>
