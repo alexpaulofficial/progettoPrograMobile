@@ -50,4 +50,9 @@
         android:defaultValue="default" />
 
     </fragment>
+    <fragment
+            android:id="@+id/slideshowFragment"
+            android:name="com.aleciro.placehappy.ui.slideshow.SlideshowFragment"
+            android:label="Account"
+            tools:layout="@layout/fragment_slideshow"/>
 </navigation>
