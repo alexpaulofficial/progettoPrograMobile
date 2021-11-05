@@ -73,6 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
    int _currentIndex = 0;
    bool _place = false;
     List _places = [];
+    int _currentPlace = 0;
    void db () async {
      // Avoid errors caused by flutter upgrade.
      // Importing 'package:flutter/widgets.dart' is required.
@@ -202,12 +203,12 @@ class _MyHomePageState extends State<MyHomePage> {
      });
    }
 
-   void onPlaceTapped() {
+   /*void onPlaceTapped() {
      setState(() {
        _place = true;
 
      });
-   }
+   }*/
 
    Widget titleSetter () {
      if (_place == true) {
@@ -227,7 +228,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
    Widget bodySetter () {
     if (_place==true) {
-      return Text('qui luogo descrizione foto ecc...');
+      return Text(_places[_currentPlace].shortDescr);
     }
 
      if (_currentIndex == 0) {
@@ -268,10 +269,14 @@ class _MyHomePageState extends State<MyHomePage> {
        separatorBuilder: (BuildContext context, int index) => const Divider (),
        itemCount: _places.length,
        itemBuilder: (BuildContext context, int index){
-         return Column (children :[ Text(_places[index].name),
+         return GestureDetector(onTap: ()=> setState(() {
+           _place = true;
+           _currentPlace = index;
+
+         }), child: Column (children :[ Text(_places[index].name),
            Text(_places[index].shortDescr),
            Text(_places[index].image),
-         ]);
+         ]));
        }))]);
 
 
