@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation2"
+    app:startDestination="@+id/navigation_home">
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.aleciro.placehappy.ui.home.HomeFragment"
+        android:label="@string/title_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_navigation_home_to_placeFragment"
+            app:destination="@id/placeFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/luoghi"
+        android:name="com.aleciro.placehappy.PlacesFragment"
+        android:label="Luoghi"
+        tools:layout="@layout/fragment_places" >
+        <action
+            android:id="@+id/action_luoghi_to_placeFragment"
+            app:destination="@id/placeFragment" />
+        <argument
+            android:name="nomeTag"
+            app:argType="string"
+            android:defaultValue="default" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/tag"
+        android:name="com.aleciro.placehappy.TagsFragment"
+        android:label="Tag"
+        tools:layout="@layout/fragment_tags" >
+        <action
+            android:id="@+id/action_tag_to_luoghi"
+            app:destination="@id/luoghi" />
+    </fragment>
+    <fragment
+        android:id="@+id/placeFragment"
+        android:name="com.aleciro.placehappy.PlaceFragment"
+        android:label="Informazioni sul luogo"
+        tools:layout="@layout/fragment_place">
+
+    <argument
+        android:name="nomeLuogo"
+        app:argType="string"
+        android:defaultValue="default" />
+
+    </fragment>
+    <fragment
+            android:id="@+id/slideshowFragment"
+            android:name="com.aleciro.placehappy.ui.slideshow.SlideshowFragment"
+            android:label="Account"
+            tools:layout="@layout/fragment_slideshow"/>
+</navigation>
