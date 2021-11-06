@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:place_happy/place_screen.dart';
 import 'dart:async';
-
 import 'package:flutter/widgets.dart';
-
 import 'package:path/path.dart';
+import 'package:place_happy/tag.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:place_happy/place.dart';
 
 
-void main () async {
+void main () {
   runApp(const MyApp());
-
-
-
-
 }
 
 class MyApp extends StatelessWidget {
@@ -73,7 +67,10 @@ class _MyHomePageState extends State<MyHomePage> {
    int _currentIndex = 0;
    bool _place = false;
     List _places = [];
+    List _tags = [];
     int _currentPlace = 0;
+    String _tagName = '';
+    List _placesByTag = [];
    void db () async {
      // Avoid errors caused by flutter upgrade.
      // Importing 'package:flutter/widgets.dart' is required.
@@ -85,12 +82,16 @@ class _MyHomePageState extends State<MyHomePage> {
        // constructed for each platform.
        join(await getDatabasesPath(), 'place_happy_database.db'),
        // When the database is first created, create a table to store dogs.
-       onCreate: (db, version) {
+       onCreate: (db, version) async {
          // Run the CREATE TABLE statement on the database.
-         return db.execute(
+         await db.execute(
            'CREATE TABLE places (name TEXT PRIMARY KEY, description TEXT'
-               ', address TEXT, shortDescr TEXT, latitude DOUBLE, longitude DOUBLE, image TEXT)',
+               ', address TEXT, shortDescr TEXT, latitude DOUBLE, longitude DOUBLE, image TEXT)'
          );
+         await db.execute (
+           'CREATE TABLE tags (tagName TEXT PRIMARY KEY, place TEXT)'
+         );
+
        },
        // Set the version. This executes the onCreate function and provides a
        // path to perform database upgrades and downgrades.
@@ -109,6 +110,20 @@ class _MyHomePageState extends State<MyHomePage> {
        await db.insert(
          'places',
          place.toMap(),
+         conflictAlgorithm: ConflictAlgorithm.replace,
+       );
+     }
+     Future<void> insertTag(Tag tag) async {
+       // Get a reference to the database.
+       final db = await database;
+
+       // Insert the Dog into the correct table. You might also specify the
+       // `conflictAlgorithm` to use in case the same dog is inserted twice.
+       //
+       // In this case, replace any previous data.
+       await db.insert(
+         'tags',
+         tag.toMap(),
          conflictAlgorithm: ConflictAlgorithm.replace,
        );
      }
@@ -136,6 +151,25 @@ class _MyHomePageState extends State<MyHomePage> {
        });
      }
 
+     // A method that retrieves all the dogs from the dogs table.
+     Future<List<Tag>> tags() async {
+       // Get a reference to the database.
+       final db = await database;
+
+       // Query the table for all The Dogs.
+       final List<Map<String, dynamic>> maps = await db.query('tags');
+
+       // Convert the List<Map<String, dynamic> into a List<Dog>.
+       return List.generate(maps.length, (i) {
+         return Tag(
+
+           tagName: maps[i]['tagName'],
+           place: maps[i]['place'],
+
+         );
+       });
+     }
+
      Future<void> updatePlace(Place place) async {
        // Get a reference to the database.
        final db = await database;
@@ -148,6 +182,21 @@ class _MyHomePageState extends State<MyHomePage> {
          where: 'name = ?',
          // Pass the Dog's id as a whereArg to prevent SQL injection.
          whereArgs: [place.name],
+       );
+     }
+
+     Future<void> updateTag(Tag tag) async {
+       // Get a reference to the database.
+       final db = await database;
+
+       // Update the given Dog.
+       await db.update(
+         'places',
+         tag.toMap(),
+         // Ensure that the Dog has a matching id.
+         where: 'tagName = ?',
+         // Pass the Dog's id as a whereArg to prevent SQL injection.
+         whereArgs: [tag.tagName],
        );
      }
 
@@ -164,6 +213,20 @@ class _MyHomePageState extends State<MyHomePage> {
          whereArgs: [name],
        );
      }
+
+     Future<void> deleteTag(String tagName) async {
+       // Get a reference to the database.
+       final db = await database;
+
+       // Remove the Dog from the database.
+       await db.delete(
+         'tags',
+         // Use a `where` clause to delete a specific dog.
+         where: 'tagName = ?',
+         // Pass the Dog's id as a whereArg to prevent SQL injection.
+         whereArgs: [tagName],
+       );
+     }
      // Create a Dog and add it to the dogs table
      var piazzarep = Place(
          name : 'Piazza della Repubblica',
@@ -172,7 +235,7 @@ class _MyHomePageState extends State<MyHomePage> {
          address: 'via repubblica',
          latitude: 54.0,
          longitude: 27.3,
-         image: 'IMMAGINE'
+         image: 'piazza.webp'
      );
      var piazzetta = Place(
          name : 'Piazza Colocci',
@@ -181,12 +244,17 @@ class _MyHomePageState extends State<MyHomePage> {
          address: 'via colli',
          latitude: 56.0,
          longitude: 20.3,
-         image: 'AOOOOO'
+         image: 'piazzetta.jpg'
      );
+     var music = Tag(tagName: 'music', place: 'Piazza della Repubblica');
+     var drink = Tag (tagName: 'drink', place: 'Piazza Colocci');
 
      await insertPlace(piazzarep);
      await insertPlace(piazzetta);
+     await insertTag(music);
+     await insertTag(drink);
      _places = await places();
+     _tags = await tags();
 
 
    }
@@ -196,10 +264,8 @@ class _MyHomePageState extends State<MyHomePage> {
      setState(() {
        _currentIndex = index;
        _place = false;
-       if (_currentIndex==1)
-         {
-          db();
-         }
+       _tagName = '';
+
      });
    }
 
@@ -211,6 +277,7 @@ class _MyHomePageState extends State<MyHomePage> {
    }*/
 
    Widget titleSetter () {
+
      if (_place == true) {
        return Text('Informazioni sul luogo');
      }
@@ -219,7 +286,12 @@ class _MyHomePageState extends State<MyHomePage> {
        return Text('Home Page');
      }
      else if (_currentIndex == 1){
-       return Text('Luoghi');}
+       if (_tagName!= ''){
+         return Text('Luoghi con il tag #$_tagName');
+       }
+       else {
+         return Text('Luoghi');
+       }}
      else {
        return Text('Tag');
      }
@@ -227,13 +299,14 @@ class _MyHomePageState extends State<MyHomePage> {
    }
 
    Widget bodySetter () {
-    if (_place==true) {
-      return Text(_places[_currentPlace].shortDescr);
-    }
+     db();
+     if (_place == true) {
+       return Text(_places[_currentPlace].shortDescr);
+     }
 
      if (_currentIndex == 0) {
        return Center(
-           child:  FlutterMap (options:MapOptions(
+           child: FlutterMap(options: MapOptions(
              bounds: LatLngBounds(LatLng(43.4, 13.15), LatLng(43.6, 13.35)),
              boundsOptions: FitBoundsOptions(padding: EdgeInsets.all(8.0)),
            ),
@@ -248,12 +321,15 @@ class _MyHomePageState extends State<MyHomePage> {
                MarkerLayerOptions(
                  markers: [
                    Marker(
-                     width: 30.0,
-                     height: 30.0,
-                     point: LatLng(43.52876, 13.24017),
-                     builder: (ctx) =>
-                       GestureDetector(child:  Icon(Icons.access_alarm_outlined),
-                         onTap : () {print('tap');})
+                       width: 30.0,
+                       height: 30.0,
+                       point: LatLng(43.52876, 13.24017),
+                       builder: (ctx) =>
+                           GestureDetector(
+                               child: Icon(Icons.access_alarm_outlined),
+                               onTap: () {
+                                 print('tap');
+                               })
                    ),
                  ],
                ),
@@ -263,31 +339,90 @@ class _MyHomePageState extends State<MyHomePage> {
 
        );
      }
-     else if (_currentIndex == 1){
-       return Column (children:[
-         Expanded (child: ListView.separated(padding: const EdgeInsets.all(8),
-       separatorBuilder: (BuildContext context, int index) => const Divider (),
-       itemCount: _places.length,
-       itemBuilder: (BuildContext context, int index){
-         return GestureDetector(onTap: ()=> setState(() {
-           _place = true;
-           _currentPlace = index;
+     else if (_currentIndex == 1) {
+       if (_tagName!= ''){return Column(children: [
+         Expanded(child: ListView.separated(padding: const EdgeInsets.all(8),
+             separatorBuilder: (BuildContext context,
+                 int index) => const Divider (),
+             itemCount: _placesByTag.length,
+             itemBuilder: (BuildContext context, int index) {
+               return GestureDetector(onTap: () =>
+                   setState(() {
+                     _place = true;
+                     _currentPlace = index;
+                   }),
+                   child: Center(child: Row(
+                       mainAxisAlignment: MainAxisAlignment.spaceAround,
+                       children: [  Column(
+                           children: [ Text(_placesByTag[index].name),
+                             SizedBox(height:20),
 
-         }), child: Column (children :[ Text(_places[index].name),
-           Text(_places[index].shortDescr),
-           Text(_places[index].image),
-         ]));
-       }))]);
+                             Container(width:400, height:270, child: Image.asset('images/' + (_placesByTag[index].image)))]),
 
+                         Text(_placesByTag[index].shortDescr)])));
+             }))
+       ]);
 
+       }
+       else {
+         return Column(children: [
+         Expanded(child: ListView.separated(padding: const EdgeInsets.all(8),
+             separatorBuilder: (BuildContext context,
+                 int index) => const Divider (),
+             itemCount: _places.length,
+             itemBuilder: (BuildContext context, int index) {
+               return GestureDetector(onTap: () =>
+                   setState(() {
+                     _place = true;
+                     _currentPlace = index;
+                   }),
+                   child: Center(child: Row(
+                       mainAxisAlignment: MainAxisAlignment.spaceAround,
+                       children: [  Column(
+                           children: [ Text(_places[index].name),
+                            SizedBox(height:20),
+
+                            Container(width:400, height:270, child: Image.asset('images/' + (_places[index].image)))]),
+
+                          Text(_places[index].shortDescr)])));
+             }))
+       ]);
+       }
      }
 
 
      else {
-       return Text('');
-     }
+       return Column(children: [
+         Expanded(child: ListView.separated(padding: const EdgeInsets.all(8),
+             separatorBuilder: (BuildContext context,
+                 int index) => const Divider (),
+             itemCount: _tags.length,
+             itemBuilder: (BuildContext context, int index) {
+               return GestureDetector(onTap: () =>
+                   setState(() {
+                     _placesByTag = [];
+                     _currentIndex = 1;
+                     _tagName = _tags[index].tagName;
+                     var tag;
+                     var place;
+                     for (tag in _tags) {
+                       if (tag.tagName == _tagName) {
+                         for (place in _places)
+                           {
+                             if (place.name == tag.place) {
+                               _placesByTag.add(place);
+                             }
 
+                           }
+                         }
+
+                     }
+                   }), child: Container(height: 100,child: Center(child: Text('#${_tags[index].tagName}',textScaleFactor: 3,))));
+             }))
+       ]);
+     }
    }
+
 
 
 
@@ -346,20 +481,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
             ),
             ListTile(
-              title: Text('Home'),
-                 leading: Icon(Icons.local_offer_rounded)
-
-            ),
-            ListTile(
-              title: Text('Gallery'),
-                leading: Icon(Icons.local_offer_rounded)
-
-            ),
-            ListTile(
               title: Text('Account'),
-                leading: Icon(Icons.local_offer_rounded)
+                 leading: Icon(Icons.home)
 
             ),
+
+
           ],
         ),
       )// This trailing comma makes auto-formatting nicer for build methods.
