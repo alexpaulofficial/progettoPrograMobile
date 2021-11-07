@@ -8,19 +8,36 @@ import 'package:place_happy/place.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:workmanager/workmanager.dart';
 
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
-
+const AndroidNotificationDetails androidPlatformChannelSpecifics =
+AndroidNotificationDetails('1', 'Luogo Vicino',
+    channelDescription: 'Notifica quando un luogo è vicino',
+    importance: Importance.max,
+    priority: Priority.high,
+    ticker: 'ticker');
+const NotificationDetails platformChannelSpecifics =
+NotificationDetails(android: androidPlatformChannelSpecifics);
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) {
+    print("Native called background task:"); //simpleTask will be emitted here.
+    return Future.value(true);
+  });
+}
 void main () {
+  Workmanager().initialize(
+      callbackDispatcher, // The top level function, aka callbackDispatcher
+      isInDebugMode: true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+  );
+  Workmanager().registerOneOffTask("1", "simpleTask"); //Android only (see below)
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -50,24 +67,14 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
-
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _enabled = true;
+  int _status = 0;
+  List<DateTime> _events = [];
   int _currentIndex = 0;
   bool _place = false;
   List _places = [];
@@ -84,18 +91,6 @@ class _MyHomePageState extends State<MyHomePage> {
     zoom: 16,
   );
   void notification() async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails('1', 'Luogo Vicino',
-        channelDescription: 'Notifica quando un luogo è vicino',
-        importance: Importance.max,
-        priority: Priority.high,
-        ticker: 'ticker');
-    const NotificationDetails platformChannelSpecifics =
-    NotificationDetails(android: androidPlatformChannelSpecifics);
-
-    await flutterLocalNotificationsPlugin.show(
-        0, 'La tua posizione', lat.toString() + " " + long.toString(), platformChannelSpecifics,
-        payload: 'item x');
   }
   void db() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -290,7 +285,6 @@ class _MyHomePageState extends State<MyHomePage> {
     _places = await places();
     _tags = await tags();
   }
-
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -343,7 +337,6 @@ class _MyHomePageState extends State<MyHomePage> {
    }*/
 
   Widget titleSetter() {
-    db();
     if (_place == true) {
       return Text('Informazioni sul luogo');
     }
@@ -367,19 +360,15 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget bodySetter() {
     _determinePosition();
     if (_place == true) {
-      return Center(child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [ Column(
-              children: [ Text(_places[_currentPlace].name),
-                SizedBox(height: 20),
+      return Column(
 
-                Container(width: 120,
-                    height: 68,
-                    child: Image.asset(
-                        'images/' + (_places[_currentPlace].image)))
-              ]),
-
-            Text(_places[_currentPlace].description)]));
+          children: [  Padding( padding: EdgeInsets.symmetric(vertical: 20),child: Text(_places[_currentPlace].name)),
+            Container(width: 360,
+                height: 160,
+                child: Image.asset(
+                    'images/' + (_places[_currentPlace].image)))
+            ,
+            Padding( padding: EdgeInsets.symmetric(vertical: 20), child: Center(child: Text(_places[_currentPlace].description, softWrap: true,)))]);
     }
 
     if (_currentIndex == 0) {
