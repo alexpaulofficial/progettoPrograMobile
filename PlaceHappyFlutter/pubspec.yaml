@@ -37,6 +37,8 @@ dependencies:
   google_maps_flutter: ^2.1.0
   flutter_local_notifications: ^9.0.2
   workmanager: ^0.4.1
+  firebase_auth: ^3.0.1
+  firebase_core: ^1.4.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -70,6 +72,11 @@ flutter:
   assets:
      - images/piazza.webp
      - images/piazzetta.jpg
+     - images/giardini_pubblici.jpeg
+     - images/birreria_agostino.jpg
+     - images/circolo_cittadino.jpg
+     - images/ciro_pio.jpg
+     - images/hemingway.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

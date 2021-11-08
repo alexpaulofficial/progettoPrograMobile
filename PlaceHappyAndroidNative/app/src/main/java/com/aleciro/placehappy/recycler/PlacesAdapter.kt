@@ -44,12 +44,12 @@ class PlacesAdapter(val data: MutableList<Place>) : RecyclerView.Adapter<PlacesA
         holder.descrizioneBreve.text =   data.get(position).shortDescr
        var image : String = data.get(position).image
         when (image){
-            "casa_mia"-> holder.image.setImageResource(R.drawable.casa_mia)
-            "corso_matteotti"-> holder.image.setImageResource(R.drawable.corso_matteotti)
+            "giardini_pubblici"-> holder.image.setImageResource(R.drawable.giardini_pubblici)
+            "circolo_cittadino"-> holder.image.setImageResource(R.drawable.circolo_cittadino)
+            "birreria_agostino"-> holder.image.setImageResource(R.drawable.birreria_agostino)
+            "ciro_pio"-> holder.image.setImageResource(R.drawable.ciro_pio)
             "hemingway"-> holder.image.setImageResource(R.drawable.hemingway)
-            "piazza_repubblica"-> holder.image.setImageResource(R.drawable.piazza_repubblica)
-            "pizzeria_da_ciro"-> holder.image.setImageResource(R.drawable.pizzeria_da_ciro)
-            else-> holder.image.setImageResource(R.drawable.pizzeria_da_ciro)
+            else-> holder.image.setImageResource(R.drawable.ciro_pio)
         }
 
     }

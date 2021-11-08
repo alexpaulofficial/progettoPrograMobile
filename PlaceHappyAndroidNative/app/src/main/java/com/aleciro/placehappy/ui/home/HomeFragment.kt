@@ -74,72 +74,70 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
             mapReady = true
         }
 
-        val piazza_repubblica = getString(R.string.piazza_repubblica)
-        val hemingway = getString(R.string.hemingway)
-        val corso_matteotti = getString(R.string.corso_matteotti)
-        val casa_mia = getString(R.string.casa_mia)
-        val pizzeria_da_ciro = getString(R.string.pizzeria_da_ciro)
+
         viewModel.addPlace(
             arrayOf(
                 Place(
-                    "Piazza della Repubblica",
-                    "una bellissima piazza, veramente bella puoi" +
-                            " farci tutto quello che vuoi, oggi ci hanno anche messo l'obelisco che" +
-                            " prima stava dall'altra parte",
-                    "Piazza bellissima ora anche con l'obelisco che prima stava in Piazza Pergolesi",
-                    "via saffi",
-                    43.5186806,
-                    13.2266059,
-                    piazza_repubblica
+                    "Giardini Pubblici",
+                    "I Giardini Pubblici di Jesi sono da sempre un luogo di incontro per persone di ogni età. Ci sono infatti giochi per bambini, come ad esempio scivoli,  altalene, una pista da pattinaggio, ma si possono trovare anche tavoli da ping pong, scacchi e molto altro. All'interno è situato anche un bar denominato 'Lo Sbarello', che offre pizza, gelati, ma anche drink e aperitivi, sempre con musica annessa.",
+                    "Parco con giochi, bar e pineta.",
+                    " ",
+                    43.51839320285577,
+                    13.229754169318705,
+                    "giardini_pubblici"
                 ),
 
                 Place(
-                    "Bar Hemingway", "drink ti ubriachi", "Drink buoni di vari gusti, tavolini" +
-                            "con possibilità di sedersi", "via bella", 3322.41, 21.23, hemingway
+                    "Birreria Sant'Agostino", "La Birreria Sant'Agostino, situata nel cuore del centro di Jesi, è specializzata nelle birre artigianali. Qui si possono trovare infatti birre di ogni tipologia e nazionalità. Ci sono molte birre speciali belghe, tedesche, irlandesi, ma sicuramente anche le più classiche, come la Weiss e la Guinness. Il luogo è fornito  di tavoli sia all'aperto, sia sotto un loggiato, con riscaldamento per l'inverno. Possibilità di aperitivi.", "Birreria fornita di varie birre artigianali.",
+                             " ", 43.522838388573014, 13.244360149177467, "birreria_agostino"
                 ),
 
                 Place(
-                    "Corso Matteotti",
-                    "qualche vasca per sgranchire le gambe",
-                    "passeggiate in questo" +
-                            " bellissimo corso, ora sta venendo rinnovato e per fine anno sarà bellissimo",
-                    "corso matteotti",
-                    32.1,
-                    21.24,
-                    corso_matteotti
+                    "Circolo Cittadino",
+                    "Il Circolo Cittadino di Jesi è una struttura ormai storica di questa città, che mette al centro la socialità e l'interazione fra i suoi soci. E' dotato di molti campi da tennis, ma anche di un ristorante e di una sala convegni. Spesso inoltre sono organizzati tornei di biliardo o di giochi di carte, come ad esempio poker, bridge. ",
+                    "Centro sportivo, ricreativo e con ristorante.",
+                    " ",
+                    43.5186092800265,
+                    13.23958652517758,
+                    "circolo_cittadino"
                 ),
 
                 Place(
-                    "Casa mia",
-                    "siete tutti i benvenuti",
-                    "casa molto accogliente, musica e tutto" +
-                            " quello che volete completamente gratis, levatevi le scarpe prima di entrare però",
-                    "via saffi 8",
-                    43.5188215,
-                    13.2256371,
-                    casa_mia
+                    "Ciro e Pio",
+                    "Ciro e Pio è una gelateria storica di Jesi, presente nella città dal 1952. Qui si possono trovare gelati artigianali con una grande varietà di gusti.  Molto frequentata anche d'inverno, grazie al suo spazio al coperto.",
+                    "Gelati artigianali e altre specialità, dal 1952.",
+                    " ",
+                    43.522261352097956,
+                    13.240193713598416,
+                    "ciro_pio"
                 ),
 
                 Place(
-                    "Pizzeria da Ciro",
-                    "la vera pizza napoletana",
-                    "pizza napoletana come piace" +
-                            " al padrone di casa, Ciro, ormai ottantenne ma ancora con molta voglia e passione",
-                    "via bellissima",
-                    32.134,
-                    21.3242,
-                    pizzeria_da_ciro
+                    "Hemingway Cafè",
+                    "Locale nel centro di Jesi, specializzato in drink e cocktails di ogni genere. Soprattutto nel weekend risulta frequentato da moltissimi giovani, in quanto si trova in un luogo molto centrale, comodo per ritrovarsi, e crea una bella atmosfera mettendo musica.",
+                    "Musica, drink e cocktails di ogni tipo.",
+                    " ",
+                    43.522817250948364,
+                    13.244443942364535,
+                    "hemingway"
                 )
             )
         )
         viewModel.addTag(
             arrayOf(
-                Tag("Eventi", "Piazza della Repubblica"),
-                Tag("Eventi", "Piazza della Repubblica"),
-                Tag("Musica", "Bar Hemingway"),
-                Tag("Drink", "Bar Hemingway"),
-                Tag("Eventi", "Casa mia"),
-                Tag("Food", "Pizzeria da Ciro")
+                Tag("Drink", "Giardini Pubblici"),
+                Tag("Musica", "Giardini Pubblici"),
+                Tag("Svago", "Giardini Pubblici"),
+                Tag("Cibo", "Giardini Pubblici"),
+                Tag("Drink", "Birreria Sant'Agostino"),
+                Tag("Cibo", "Birreria Sant'Agostino"),
+                Tag("Cibo", "Circolo Cittadino"),
+                Tag("Svago", "Circolo Cittadino"),
+                Tag("Cibo", "Ciro e Pio"),
+                Tag("Drink", "Hemingway Cafè"),
+                Tag("Musica", "Hemingway Cafè"),
+
+
             )
         )
 

@@ -35,12 +35,12 @@ class PlaceFragment : Fragment() {
             view.findViewById<TextView>(R.id.descLong).text = place.description
             val image : String = place.image
             when (image){
-                "casa_mia"-> view.findViewById<ImageView>(R.id.imageView2).setImageResource(R.drawable.casa_mia)
-                "corso_matteotti"-> view.findViewById<ImageView>(R.id.imageView2).setImageResource(R.drawable.corso_matteotti)
+                "giardini_pubblici"-> view.findViewById<ImageView>(R.id.imageView2).setImageResource(R.drawable.giardini_pubblici)
+                "birreria_agostino"-> view.findViewById<ImageView>(R.id.imageView2).setImageResource(R.drawable.birreria_agostino)
+                "circolo_cittadino"-> view.findViewById<ImageView>(R.id.imageView2).setImageResource(R.drawable.circolo_cittadino)
                 "hemingway"-> view.findViewById<ImageView>(R.id.imageView2).setImageResource(R.drawable.hemingway)
-                "piazza_repubblica"-> view.findViewById<ImageView>(R.id.imageView2).setImageResource(R.drawable.piazza_repubblica)
-                "pizzeria_da_ciro"-> view.findViewById<ImageView>(R.id.imageView2).setImageResource(R.drawable.pizzeria_da_ciro)
-                else-> view.findViewById<ImageView>(R.id.imageView2).setImageResource(R.drawable.pizzeria_da_ciro)
+                "ciro_pio"-> view.findViewById<ImageView>(R.id.imageView2).setImageResource(R.drawable.ciro_pio)
+                else-> view.findViewById<ImageView>(R.id.imageView2).setImageResource(R.drawable.ciro_pio)
             }
 
         }

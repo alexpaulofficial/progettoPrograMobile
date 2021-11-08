@@ -1,14 +1,24 @@
+import 'dart:core';
+import 'dart:core';
+
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
+import 'package:place_happy/create_account_screen.dart';
+import 'package:place_happy/dbhelper.dart';
+import 'package:place_happy/plac_tag_arg.dart';
 import 'package:place_happy/tag.dart';
+import 'package:place_happy/user_info.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:place_happy/place.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:workmanager/workmanager.dart';
+
+import 'login_screen.dart';
 
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
@@ -26,13 +36,18 @@ void callbackDispatcher() {
     return Future.value(true);
   });
 }
+
 void main () {
-  Workmanager().initialize(
+
+ Workmanager().initialize(
       callbackDispatcher, // The top level function, aka callbackDispatcher
       isInDebugMode: true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
   );
-  Workmanager().registerOneOffTask("1", "simpleTask"); //Android only (see below)
+  Workmanager().registerOneOffTask("1", "simpleTask");
+
+
   runApp(const MyApp());
+
 }
 
 class MyApp extends StatelessWidget {
@@ -41,10 +56,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/',
+      initialRoute: '/login',
       routes : {
-        '/' : (context) => const MyHomePage(),
-       // '/place': (context) => PlaceScreen ()
+        '/home' : (context) => const MyHomePage(),
+       '/login': (context) => Login (),
+        '/info': (context) => UserInfo(),
+        '/createaccount': (context)=> CreateAccount()
       },
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -67,18 +84,31 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
+
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+
   bool _enabled = true;
   int _status = 0;
+  List _tagsStrings = [];
+  bool _marker = false;
   List<DateTime> _events = [];
   int _currentIndex = 0;
   bool _place = false;
+  List<Marker> _markers = <Marker>[];
+  _MyHomePageState () {
+    db();
+
+
+  }
+
   List _places = [];
   List _tags = [];
+
   int _currentPlace = 0;
   String _tagName = '';
   List _placesByTag = [];
@@ -102,188 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
           if (payload != null) {
             debugPrint('notification payload: $payload');
           }});
-    // Avoid errors caused by flutter upgrade.
-    // Importing 'package:flutter/widgets.dart' is required.
-    WidgetsFlutterBinding.ensureInitialized();
-    // Open the database and store the reference.
-    final database = openDatabase(
-      // Set the path to the database. Note: Using the `join` function from the
-      // `path` package is best practice to ensure the path is correctly
-      // constructed for each platform.
-      join(await getDatabasesPath(), 'place_happy_database.db'),
-      // When the database is first created, create a table to store dogs.
-      onCreate: (db, version) async {
-        // Run the CREATE TABLE statement on the database.
-        await db.execute(
-            'CREATE TABLE places (name TEXT PRIMARY KEY, description TEXT'
-                ', address TEXT, shortDescr TEXT, latitude DOUBLE, longitude DOUBLE, image TEXT)'
-        );
-        await db.execute(
-            'CREATE TABLE tags (tagName TEXT PRIMARY KEY, place TEXT)'
-        );
-      },
-      // Set the version. This executes the onCreate function and provides a
-      // path to perform database upgrades and downgrades.
-      version: 1,
-    );
 
-    // Define a function that inserts dogs into the database
-    Future<void> insertPlace(Place place) async {
-      // Get a reference to the database.
-      final db = await database;
-
-      // Insert the Dog into the correct table. You might also specify the
-      // `conflictAlgorithm` to use in case the same dog is inserted twice.
-      //
-      // In this case, replace any previous data.
-      await db.insert(
-        'places',
-        place.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    }
-    Future<void> insertTag(Tag tag) async {
-      // Get a reference to the database.
-      final db = await database;
-
-      // Insert the Dog into the correct table. You might also specify the
-      // `conflictAlgorithm` to use in case the same dog is inserted twice.
-      //
-      // In this case, replace any previous data.
-      await db.insert(
-        'tags',
-        tag.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    }
-
-    // A method that retrieves all the dogs from the dogs table.
-    Future<List<Place>> places() async {
-      // Get a reference to the database.
-      final db = await database;
-
-      // Query the table for all The Dogs.
-      final List<Map<String, dynamic>> maps = await db.query('places');
-
-      // Convert the List<Map<String, dynamic> into a List<Dog>.
-      return List.generate(maps.length, (i) {
-        return Place(
-
-          name: maps[i]['name'],
-          description: maps[i]['description'],
-          shortDescr: maps[i]['shortDescr'],
-          address: maps[i]['address'],
-          latitude: maps[i]['latitude'],
-          longitude: maps[i]['longitude'],
-          image: maps[i]['image'],
-        );
-      });
-    }
-
-    // A method that retrieves all the dogs from the dogs table.
-    Future<List<Tag>> tags() async {
-      // Get a reference to the database.
-      final db = await database;
-
-      // Query the table for all The Dogs.
-      final List<Map<String, dynamic>> maps = await db.query('tags');
-
-      // Convert the List<Map<String, dynamic> into a List<Dog>.
-      return List.generate(maps.length, (i) {
-        return Tag(
-
-          tagName: maps[i]['tagName'],
-          place: maps[i]['place'],
-
-        );
-      });
-    }
-
-    Future<void> updatePlace(Place place) async {
-      // Get a reference to the database.
-      final db = await database;
-
-      // Update the given Dog.
-      await db.update(
-        'places',
-        place.toMap(),
-        // Ensure that the Dog has a matching id.
-        where: 'name = ?',
-        // Pass the Dog's id as a whereArg to prevent SQL injection.
-        whereArgs: [place.name],
-      );
-    }
-
-    Future<void> updateTag(Tag tag) async {
-      // Get a reference to the database.
-      final db = await database;
-
-      // Update the given Dog.
-      await db.update(
-        'places',
-        tag.toMap(),
-        // Ensure that the Dog has a matching id.
-        where: 'tagName = ?',
-        // Pass the Dog's id as a whereArg to prevent SQL injection.
-        whereArgs: [tag.tagName],
-      );
-    }
-
-    Future<void> deletePlace(String name) async {
-      // Get a reference to the database.
-      final db = await database;
-
-      // Remove the Dog from the database.
-      await db.delete(
-        'places',
-        // Use a `where` clause to delete a specific dog.
-        where: 'name = ?',
-        // Pass the Dog's id as a whereArg to prevent SQL injection.
-        whereArgs: [name],
-      );
-    }
-
-    Future<void> deleteTag(String tagName) async {
-      // Get a reference to the database.
-      final db = await database;
-
-      // Remove the Dog from the database.
-      await db.delete(
-        'tags',
-        // Use a `where` clause to delete a specific dog.
-        where: 'tagName = ?',
-        // Pass the Dog's id as a whereArg to prevent SQL injection.
-        whereArgs: [tagName],
-      );
-    }
-    // Create a Dog and add it to the dogs table
-    var piazzarep = Place(
-        name: 'Piazza della Repubblica',
-        description: 'un bellissimo luogo, adesso è stata spostata la fontana ok',
-        shortDescr: 'veramente stupefacente',
-        address: 'via repubblica',
-        latitude: 43.5250291,
-        longitude: 13.231723,
-        image: 'piazza.webp'
-    );
-    var piazzetta = Place(
-        name: 'Piazza Giardini',
-        description: 'un bruttissimo luogo, adesso è stata spostata la fontana ok',
-        shortDescr: 'aaaaaaaaaaaaaaaaaaaaaa',
-        address: 'via colli',
-        latitude: 43.5191535,
-        longitude: 13.2291542,
-        image: 'piazzetta.jpg'
-    );
-    var music = Tag(tagName: 'music', place: 'Piazza della Repubblica');
-    var drink = Tag(tagName: 'drink', place: 'Piazza Colocci');
-
-    await insertPlace(piazzarep);
-    await insertPlace(piazzetta);
-    await insertTag(music);
-    await insertTag(drink);
-    _places = await places();
-    _tags = await tags();
   }
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
@@ -328,7 +177,60 @@ class _MyHomePageState extends State<MyHomePage> {
       _tagName = '';
     });
   }
+ Future<bool> backbutton () async {
 
+      if (_currentIndex==0){
+        setState(() {
+          _place=false;
+        });
+    return true;
+      }
+      if ((_tagName!='')){
+        if (_place==true) {
+          setState(() {
+            _place = false;
+            _currentIndex = 1;
+          });
+          return false;
+        }
+        else {
+          setState(() {
+            _place = false;
+            _currentIndex = 2;
+
+          });
+          return false;
+        }
+
+      }
+      else if((_tagName=='')&&(_place == true)){
+        if (_marker == true)
+          {
+            setState(() {
+              _currentIndex=0;
+              _place=false;
+              _marker=false;
+
+            });
+            return false;
+          }
+        else {
+          setState(() {
+            _place = false;
+          });
+          return false;
+        }
+      }
+
+      else {
+        setState(() {_currentIndex = 0;
+      _place = false;
+        });
+
+        return false;
+      }
+
+ }
   /*void onPlaceTapped() {
      setState(() {
        _place = true;
@@ -337,6 +239,8 @@ class _MyHomePageState extends State<MyHomePage> {
    }*/
 
   Widget titleSetter() {
+
+
     if (_place == true) {
       return Text('Informazioni sul luogo');
     }
@@ -360,7 +264,20 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget bodySetter() {
     _determinePosition();
     if (_place == true) {
-      return Column(
+      if(_tagName!= ''){ return Column(
+
+          children: [  Padding( padding: EdgeInsets.symmetric(vertical: 20),child: Text(_placesByTag[_currentPlace].name)),
+            Container(width: 360,
+                height: 160,
+                child: Image.asset(
+                    'images/' + (_placesByTag[_currentPlace].image)))
+            ,
+            Padding( padding:EdgeInsets.only(top:20, left:20, bottom:20), child: Center(child: Text(_placesByTag[_currentPlace].description, softWrap: true,)))]);
+
+
+      }
+      else {
+        return Column(
 
           children: [  Padding( padding: EdgeInsets.symmetric(vertical: 20),child: Text(_places[_currentPlace].name)),
             Container(width: 360,
@@ -368,7 +285,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Image.asset(
                     'images/' + (_places[_currentPlace].image)))
             ,
-            Padding( padding: EdgeInsets.symmetric(vertical: 20), child: Center(child: Text(_places[_currentPlace].description, softWrap: true,)))]);
+            Padding( padding: EdgeInsets.only(top:20, left:20, bottom:20), child: Center(child: Text(_places[_currentPlace].description, softWrap: true,)))]);
+      }
     }
 
     if (_currentIndex == 0) {
@@ -380,7 +298,6 @@ class _MyHomePageState extends State<MyHomePage> {
             lat = position.latitude;
             long = position.longitude;
           });
-      List<Marker> _markers = <Marker>[];
       for (var i = 0 ; i < _places.length; i++ ) {
         _markers.add(
             Marker(
@@ -390,8 +307,15 @@ class _MyHomePageState extends State<MyHomePage> {
                   title: _places[i].name,
                   onTap: () =>
                       setState(() {
+                        _marker=true;
+                        _tagName='';
+                        _currentIndex=1;
+
+
                         _place = true;
                         _currentPlace = i;
+
+
                       }),
                 )
             )
@@ -422,19 +346,18 @@ class _MyHomePageState extends State<MyHomePage> {
                       _place = true;
                       _currentPlace = index;
                     }),
-                    child: Center(child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [ Column(
-                            children: [ Text(_placesByTag[index].name),
-                              SizedBox(height: 20),
+                    child:Center(child:  Column(
+                        children: [ Padding(padding: EdgeInsets.only(top: 20, bottom:15), child:Text(_places[index].name, softWrap: true,)),
 
-                              Container(width: 120,
-                                  height: 68,
-                                  child: Image.asset(
-                                      'images/' + (_placesByTag[index].image)))
-                            ]),
 
-                          Text(_placesByTag[index].shortDescr)])));
+                          Container(width: 120,
+                              height: 68,
+                              child: Image.asset(
+                                  'images/' + (_placesByTag[index].image))),
+                          Padding(padding: EdgeInsets.only(top:20, bottom:30), child:Text(_placesByTag[index].shortDescr, softWrap: true,))]),
+
+
+                    ));
               }))
         ]);
       }
@@ -450,19 +373,18 @@ class _MyHomePageState extends State<MyHomePage> {
                       _place = true;
                       _currentPlace = index;
                     }),
-                    child: Center(child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [ Column(
-                            children: [ Text(_places[index].name),
-                              SizedBox(height: 20),
+                    child: Center(child:  Column(
+                            children: [ Padding(padding: EdgeInsets.only(top: 20, bottom:15), child:Text(_places[index].name, softWrap: true,)),
+
 
                               Container(width: 120,
                                   height: 68,
                                   child: Image.asset(
-                                      'images/' + (_places[index].image)))
-                            ]),
+                                      'images/' + (_places[index].image))),
+                              Padding(padding: EdgeInsets.only(top:20, bottom:30), child:Text(_places[index].shortDescr, softWrap: true,))]),
 
-                          Text(_places[index].shortDescr)])));
+
+                          ));
               }))
         ]);
       }
@@ -474,20 +396,22 @@ class _MyHomePageState extends State<MyHomePage> {
         Expanded(child: ListView.separated(padding: const EdgeInsets.all(8),
             separatorBuilder: (BuildContext context,
                 int index) => const Divider (),
-            itemCount: _tags.length,
+            itemCount: _tagsStrings.length,
             itemBuilder: (BuildContext context, int index) {
               return GestureDetector(onTap: () =>
                   setState(() {
                     _placesByTag = [];
                     _currentIndex = 1;
-                    _tagName = _tags[index].tagName;
+                    _tagName = _tagsStrings[index];
                     var tag;
                     var place;
                     for (tag in _tags) {
                       if (tag.tagName == _tagName) {
                         for (place in _places) {
                           if (place.name == tag.place) {
-                            _placesByTag.add(place);
+                            if (!(_placesByTag.contains(place))) {
+                              _placesByTag.add(place);
+                            }
                           }
                         }
                       }
@@ -495,7 +419,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   }),
                   child: Container(height: 100,
                       child: Center(child: Text(
-                        '#${_tags[index].tagName}', textScaleFactor: 3,))));
+                        '#${_tagsStrings[index]}', textScaleFactor: 3,))));
             }))
       ]);
     }
@@ -503,13 +427,24 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments as PlaceTagArg;
+    _places = args.places;
+    _tags = args.tags;
+    for (var k =0; k<_tags.length; k++){
+    if (!_tagsStrings.contains(_tags[k].tagName))
+     {
+       _tagsStrings.add(_tags[k].tagName);
+     }
+    }
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return Scaffold(
+    return WillPopScope (onWillPop: ()  =>backbutton()
+
+    ,child: Scaffold(
         appBar: AppBar(
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
@@ -538,6 +473,8 @@ class _MyHomePageState extends State<MyHomePage> {
           selectedItemColor: Colors.purple[900],
 
         ),
+
+
         drawer: Drawer(
           // Add a ListView to the drawer. This ensures the user can scroll
           // through the options in the drawer if there isn't enough vertical
@@ -545,7 +482,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: ListView(
             // Important: Remove any padding from the ListView.
             padding: EdgeInsets.zero,
-            children: const [
+            children:  [
               DrawerHeader(
                 decoration: BoxDecoration(
                   color: Colors.blue,
@@ -555,7 +492,9 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               ListTile(
                   title: Text('Account'),
-                  leading: Icon(Icons.home)
+                  leading: Icon(Icons.home),
+                onTap: (){ Navigator.pushNamed(context,'/info');},
+
 
               ),
 
@@ -563,8 +502,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
         ) // This trailing comma makes auto-formatting nicer for build methods.
-    );
+    ));
   }
+
+
 }
 
 
