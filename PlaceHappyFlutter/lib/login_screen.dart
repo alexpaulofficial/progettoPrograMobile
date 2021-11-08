@@ -1,25 +1,18 @@
 import 'dart:core';
 import 'dart:core';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
-import 'package:place_happy/dbhelper.dart';
 import 'package:place_happy/plac_tag_arg.dart';
 import 'package:place_happy/tag.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:place_happy/place.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:workmanager/workmanager.dart';
-
-
-
-
-
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -27,8 +20,37 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  final myControllerEmail = TextEditingController();
+  final myControllerPass = TextEditingController();
+  bool _initialized = false;
+  bool _error = false;
+  bool logged = false;
+
+  // Define an async function to initialize FlutterFire
+  void initializeFlutterFire() async {
+    try {
+      // Wait for Firebase to initialize and set `_initialized` state to true
+      await Firebase.initializeApp();
+      setState(() {
+        _initialized = true;
+      });
+    } catch (e) {
+      // Set `_error` state to true if Firebase initialization fails
+      setState(() {
+        _error = true;
+      });
+    }
+  }
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    myControllerEmail.dispose();
+    myControllerPass.dispose();
+    super.dispose();
+  }
  List _placesLogin = [];
  List _tagsLogin = [];
+ var currentUser;
   void ao () async {
   WidgetsFlutterBinding.ensureInitialized();
   // Avoid errors caused by flutter upgrade.
@@ -266,9 +288,8 @@ _tagsLogin = await tags();
 
 _LoginState () {
     ao();
+    initializeFlutterFire();
 }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -282,23 +303,23 @@ _LoginState () {
 
           children: <Widget>[
 
-            const Padding(
+            Padding(
               //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
               padding:  EdgeInsets.only(
             left: 15.0, right: 15.0, top: 15, bottom: 0),
               child: TextField(
+                controller: myControllerEmail,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Email',
                     ),
               ),
-            ),
-            const Padding(
+            ), Padding(
               padding: EdgeInsets.only(
                   left: 15.0, right: 15.0, top: 15, bottom: 25),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
-
+                controller: myControllerPass,
                 obscureText: true,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
@@ -313,19 +334,33 @@ _LoginState () {
               decoration: BoxDecoration(
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
               child: ElevatedButton(
-                onPressed: () {
-
-
-                  Navigator.pushReplacementNamed(
+                onPressed: () async {
+                  try {
+                    UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                        email: myControllerEmail.text,
+                        password: myControllerPass.text
+                    );
+                    if (userCredential.user != 0)
+                      {
+                        var currentUser = FirebaseAuth.instance.currentUser;
+                        Navigator.pushNamedAndRemoveUntil(
                   context,
                   '/home',
-                  arguments: PlaceTagArg(
-                      _placesLogin,
-                    _tagsLogin
-                  ),
+                            ModalRoute.withName('/'),
+                          arguments: PlaceTagArg(_placesLogin, _tagsLogin, currentUser),
                 );
-
-
+                      }
+                  } on FirebaseAuthException catch (e) {
+                      Fluttertoast.showToast(
+                          msg: e.code,
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.CENTER,
+                          timeInSecForIosWeb: 1,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                          fontSize: 16.0
+                      );
+                  }
 
                 },
                 child: const Text(
@@ -340,11 +375,25 @@ _LoginState () {
               decoration: BoxDecoration(
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
               child: ElevatedButton(
-                onPressed: () {Navigator.pushNamed(
+                onPressed: () async {
+                  try {
+                    UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                        email: "barry.allen@example.com",
+                        password: "SuperSecretPassword!"
+                    );
+                  } on FirebaseAuthException catch (e) {
+                    if (e.code == 'weak-password') {
+                      print('The password provided is too weak.');
+                    } else if (e.code == 'email-already-in-use') {
+                      print('The account already exists for that email.');
+                    }
+                  } catch (e) {
+                    print(e);
+                  }
+
+                  Navigator.pushNamed(
                   context,
-                  '/createaccount',
-
-
+                  '/createaccount', arguments: PlaceTagArg(_placesLogin, _tagsLogin, currentUser)
                 );
 
 

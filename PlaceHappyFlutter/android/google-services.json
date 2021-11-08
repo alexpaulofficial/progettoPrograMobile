@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "730640272141",
+    "project_id": "place-happy",
+    "storage_bucket": "place-happy.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:730640272141:android:5ff87e58e5c7eb20393e44",
+        "android_client_info": {
+          "package_name": "com.aleciro.placehappy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "730640272141-98mnjr0qi5p1cstv47qoik99avh2nrnt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBb-gbZnYy1C-B6_GPZAHLh59l3TfK5UrM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "730640272141-98mnjr0qi5p1cstv47qoik99avh2nrnt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:730640272141:android:e5f6a25f8f8c7479393e44",
+        "android_client_info": {
+          "package_name": "com.example.place_happy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "730640272141-98mnjr0qi5p1cstv47qoik99avh2nrnt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBb-gbZnYy1C-B6_GPZAHLh59l3TfK5UrM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "730640272141-98mnjr0qi5p1cstv47qoik99avh2nrnt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

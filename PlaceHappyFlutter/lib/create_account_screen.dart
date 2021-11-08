@@ -1,25 +1,18 @@
 import 'dart:core';
 import 'dart:core';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path/path.dart';
-import 'package:place_happy/dbhelper.dart';
+import 'package:place_happy/plac_tag_arg.dart';
 import 'package:place_happy/tag.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:place_happy/place.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:workmanager/workmanager.dart';
-
-
-
-
-
-
 
 class CreateAccount extends StatefulWidget {
   @override
@@ -27,8 +20,44 @@ class CreateAccount extends StatefulWidget {
 }
 
 class _CreateAccountState extends State<CreateAccount> {
+  List _places = [];
+  List _tags = [];
+  final myControllerEmail = TextEditingController();
+  final myControllerPass = TextEditingController();
+  final myControllerNome = TextEditingController();
+  final myControllerCognome = TextEditingController();
+  bool _initialized = false;
+  bool _error = false;
+
+  // Define an async function to initialize FlutterFire
+  void initializeFlutterFire() async {
+    try {
+      // Wait for Firebase to initialize and set `_initialized` state to true
+      await Firebase.initializeApp();
+      setState(() {
+        _initialized = true;
+      });
+    } catch (e) {
+      // Set `_error` state to true if Firebase initialization fails
+      setState(() {
+        _error = true;
+      });
+    }
+  }
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    myControllerEmail.dispose();
+    myControllerPass.dispose();
+    myControllerNome.dispose();
+    myControllerCognome.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments as PlaceTagArg;
+    _places = args.places;
+    _tags = args.tags;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -89,10 +118,32 @@ class _CreateAccountState extends State<CreateAccount> {
         decoration: BoxDecoration(
             color: Colors.blue, borderRadius: BorderRadius.circular(20)),
         child: ElevatedButton(
-          onPressed: () {
-
-
-
+          onPressed: () async {
+            try {
+              UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                  email: myControllerEmail.text,
+                  password: myControllerPass.text
+              );
+              if (userCredential.user != 0)
+              {
+                var currentUser = FirebaseAuth.instance.currentUser;
+                Navigator.pushNamed(
+                    context,
+                    '/home',
+                    arguments: PlaceTagArg(_places, _tags, currentUser)
+                );
+              }
+            } on FirebaseAuthException catch (e) {
+              Fluttertoast.showToast(
+                  msg: e.code,
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.CENTER,
+                  timeInSecForIosWeb: 1,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 16.0
+              );
+            }
           },
           child: const Text(
             'Registrati', softWrap: true,

@@ -1,7 +1,5 @@
 import 'dart:core';
-import 'dart:core';
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/widgets.dart';
@@ -16,9 +14,9 @@ import 'package:place_happy/place.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:workmanager/workmanager.dart';
-
+import 'package:firebase_core/firebase_core.dart';
 import 'login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
@@ -30,29 +28,12 @@ AndroidNotificationDetails('1', 'Luogo Vicino',
     ticker: 'ticker');
 const NotificationDetails platformChannelSpecifics =
 NotificationDetails(android: androidPlatformChannelSpecifics);
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) {
-    print("Native called background task:"); //simpleTask will be emitted here.
-    return Future.value(true);
-  });
-}
-
 void main () {
-
- Workmanager().initialize(
-      callbackDispatcher, // The top level function, aka callbackDispatcher
-      isInDebugMode: true // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
-  );
-  Workmanager().registerOneOffTask("1", "simpleTask");
-
-
   runApp(const MyApp());
-
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -60,7 +41,7 @@ class MyApp extends StatelessWidget {
       routes : {
         '/home' : (context) => const MyHomePage(),
        '/login': (context) => Login (),
-        '/info': (context) => UserInfo(),
+        '/info': (context) => UserInformation(),
         '/createaccount': (context)=> CreateAccount()
       },
       title: 'Flutter Demo',
@@ -90,7 +71,25 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
+  bool _initialized = false;
+  bool _error = false;
 
+  // Define an async function to initialize FlutterFire
+  void initializeFlutterFire() async {
+    try {
+      // Wait for Firebase to initialize and set `_initialized` state to true
+      await Firebase.initializeApp();
+      setState(() {
+        _initialized = true;
+      });
+    } catch (e) {
+      // Set `_error` state to true if Firebase initialization fails
+      setState(() {
+        _error = true;
+      });
+    }
+  }
 
   bool _enabled = true;
   int _status = 0;
@@ -102,13 +101,13 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Marker> _markers = <Marker>[];
   _MyHomePageState () {
     db();
-
+    initializeFlutterFire();
 
   }
 
   List _places = [];
   List _tags = [];
-
+  var _user;
   int _currentPlace = 0;
   String _tagName = '';
   List _placesByTag = [];
@@ -178,7 +177,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
  Future<bool> backbutton () async {
-
       if (_currentIndex==0){
         setState(() {
           _place=false;
@@ -226,7 +224,6 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {_currentIndex = 0;
       _place = false;
         });
-
         return false;
       }
 
@@ -239,8 +236,6 @@ class _MyHomePageState extends State<MyHomePage> {
    }*/
 
   Widget titleSetter() {
-
-
     if (_place == true) {
       return Text('Informazioni sul luogo');
     }
@@ -329,6 +324,7 @@ class _MyHomePageState extends State<MyHomePage> {
             _controller.complete(controller);
           },
           markers: Set<Marker>.of(_markers),
+          myLocationEnabled: true,
         ),
 
       );
@@ -430,6 +426,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final args = ModalRoute.of(context)!.settings.arguments as PlaceTagArg;
     _places = args.places;
     _tags = args.tags;
+    _user = args.currentUser;
     for (var k =0; k<_tags.length; k++){
     if (!_tagsStrings.contains(_tags[k].tagName))
      {
@@ -493,7 +490,8 @@ class _MyHomePageState extends State<MyHomePage> {
               ListTile(
                   title: Text('Account'),
                   leading: Icon(Icons.home),
-                onTap: (){ Navigator.pushNamed(context,'/info');},
+                onTap: (){ Navigator.pushNamed(context,'/info',  arguments: PlaceTagArg(_places, _tags, _user)
+                );},
 
 
               ),
