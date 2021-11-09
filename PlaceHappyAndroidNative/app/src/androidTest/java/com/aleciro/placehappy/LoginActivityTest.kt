@@ -6,19 +6,20 @@ import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.rule.ActivityTestRule
+
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import  androidx.test.ext.junit.rules.ActivityScenarioRule
 import org.hamcrest.CoreMatchers.not
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+
 class LoginActivityTest {
 
     @Rule
     @JvmField
-    var activityRule = ActivityTestRule<LoginActivity>(
+    var activityRule = ActivityScenarioRule(
         LoginActivity::class.java
     )
 
@@ -30,7 +31,7 @@ class LoginActivityTest {
         onView(withId(R.id.text_email)).perform(ViewActions.typeText(username))
         onView(withId(R.id.text_password)).perform(ViewActions.typeText(password))
 
-        onView(withId(R.id.btn_login)).perform(ViewActions.scrollTo(), ViewActions.click())
+       onView(withId(R.id.btn_login)).perform(ViewActions.scrollTo(), ViewActions.click())
 
         onView(withId(R.id.bottom_nav))
             .check(doesNotExist())

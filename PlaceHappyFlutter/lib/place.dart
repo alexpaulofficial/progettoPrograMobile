@@ -1,3 +1,4 @@
+//classe che mappa nel db la tabelle dei luoghi
 class Place {
 
   final String name;

@@ -1,11 +1,9 @@
 import 'dart:core';
-
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
 import 'package:place_happy/create_account_screen.dart';
-import 'package:place_happy/dbhelper.dart';
 import 'package:place_happy/plac_tag_arg.dart';
 import 'package:place_happy/tag.dart';
 import 'package:place_happy/user_info.dart';
@@ -61,15 +59,6 @@ class MyApp extends StatelessWidget {
       },
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
 
@@ -90,16 +79,16 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _initialized = false;
   bool _error = false;
 
-  // Define an async function to initialize FlutterFire
+  //funzione asincrona che inizializza flutter
   void initializeFlutterFire() async {
     try {
-      // Wait for Firebase to initialize and set `_initialized` state to true
+     //aspetta che flutter si inizializzi e mette _initialized a true
       await Firebase.initializeApp();
       setState(() {
         _initialized = true;
       });
     } catch (e) {
-      // Set `_error` state to true if Firebase initialization fails
+      // Mette errore a true se si verifica un'eccezione
       setState(() {
         _error = true;
       });
@@ -114,6 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _currentIndex = 0;
   bool _place = false;
   List<Marker> _markers = <Marker>[];
+
   _MyHomePageState () {
     db();
     initializeFlutterFire();
@@ -148,7 +138,8 @@ class _MyHomePageState extends State<MyHomePage> {
           }});
 
   }
-
+  //metodo eseguito al click dei tab della bottom bar
+  //tramite setState cambio valore di variabili di stato e quindi si modifica l'interfaccia
   void onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -156,6 +147,8 @@ class _MyHomePageState extends State<MyHomePage> {
       _tagName = '';
     });
   }
+
+  //gestione del bottone back di android per far sì che si torni sempre alla schermata precedente
  Future<bool> backbutton () async {
       if (_currentIndex==0){
         setState(() {
@@ -208,13 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
 
  }
-  /*void onPlaceTapped() {
-     setState(() {
-       _place = true;
-
-     });
-   }*/
-
+  //metodo che setta il titolo in base al valore di variabili di stato
   Widget titleSetter() {
     if (_place == true) {
       return Text('Informazioni sul luogo');
@@ -236,9 +223,14 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+
+  //metodo che setta il body in base al valore di variabili di stato
   Widget bodySetter() {
+    //se place è true visualizza il luogo
     if (_place == true) {
-      if(_tagName!= ''){ return Column(
+
+      if(_tagName!= '')
+      { return Column(
 
           children: [  Padding( padding: EdgeInsets.symmetric(vertical: 20),child: Text(_placesByTag[_currentPlace].name)),
             Container(width: 360,
@@ -262,16 +254,8 @@ class _MyHomePageState extends State<MyHomePage> {
             Padding( padding: EdgeInsets.only(top:20, left:20, bottom:20), child: Center(child: Text(_places[_currentPlace].description, softWrap: true,)))]);
       }
     }
-
+    //se l'index è 0 visualizza la mappa
     if (_currentIndex == 0) {
-/*      StreamSubscription<Position> positionStream = Geolocator
-          .getPositionStream().listen(
-              (Position position) {
-            print(position == null ? 'Unknown' : position.latitude.toString() +
-                ', ' + position.longitude.toString());
-            lat = position.latitude;
-            long = position.longitude;
-          });*/
       for (var i = 0 ; i < _places.length; i++ ) {
         _markers.add(
             Marker(
@@ -308,6 +292,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
       );
     }
+    //se l'index è 1 visualizza la lista dei luoghi
     else if (_currentIndex == 1) {
       if (_tagName != '') {
         return Column(children: [
@@ -365,7 +350,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
 
-
+  //se l'index è 2 visualizza la lista dei tag
     else {
       return Column(children: [
         Expanded(child: ListView.separated(padding: const EdgeInsets.all(8),
@@ -402,6 +387,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    //argomenti di navigazione ricevuti
     final args = ModalRoute.of(context)!.settings.arguments as PlaceTagArg;
     _places = args.places;
     _tags = args.tags;

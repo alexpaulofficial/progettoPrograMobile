@@ -1,6 +1,5 @@
 import 'dart:core';
 import 'dart:core';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -30,45 +29,48 @@ class _CreateAccountState extends State<CreateAccount> {
   bool _initialized = false;
   bool _error = false;
 
-  // Define an async function to initialize FlutterFire
+  //funzione asincrona per inizializzare FlutterFire
   void initializeFlutterFire() async {
     try {
-      // Wait for Firebase to initialize and set `_initialized` state to true
+      //aspetta l'inizializzazione di flutterfire e mette initialized a true
       await Firebase.initializeApp();
       setState(() {
         _initialized = true;
       });
     } catch (e) {
-      // Set `_error` state to true if Firebase initialization fails
+      //variabile _error messa a true nel caso ci sia un errore
       setState(() {
         _error = true;
       });
     }
   }
+
+  //inizializza i controller quando il widget è stato creato
   @override
   void dispose() {
-    // Clean up the controller when the widget is disposed.
     myControllerEmail.dispose();
     myControllerPass.dispose();
     myControllerNome.dispose();
     myControllerCognome.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     CollectionReference users = FirebaseFirestore.instance.collection('utenti');
 
     Future<void> addUser (String uid) {
-      // Call the user's CollectionReference to add a new user
+
       return users
           .doc(uid)
         .set({
-        'nome': myControllerNome.text, // John Doe
-        'cognome': myControllerCognome.text, // Stokes and Sons
+        'nome': myControllerNome.text,
+        'cognome': myControllerCognome.text,
       })
           .then((value) => print("User Added"))
           .catchError((error) => print("Failed to add user: $error"));
     }
+    //argomenti di navigazione ricevuti dal login screen
     final args = ModalRoute.of(context)!.settings.arguments as PlaceTagArg;
     _places = args.places;
     _tags = args.tags;
@@ -137,12 +139,14 @@ class _CreateAccountState extends State<CreateAccount> {
         child: ElevatedButton(
           onPressed: () async {
             try {
+              //prova a creare l'utente con i dati inseriti nei campi di testo
               UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
                   email: myControllerEmail.text,
                   password: myControllerPass.text
               );
               if (userCredential.user != 0)
               {
+                //creazione utente
                 var currentUser = FirebaseAuth.instance.currentUser;
 
                 addUser(currentUser!.uid);
@@ -153,6 +157,7 @@ class _CreateAccountState extends State<CreateAccount> {
                 );
               }
             } on FirebaseAuthException catch (e) {
+              //visualizzato toast con errore nel caso email o password non vadano bene per la creazione dell'account
               Fluttertoast.showToast(
                   msg: e.code,
                   toastLength: Toast.LENGTH_SHORT,

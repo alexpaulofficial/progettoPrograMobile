@@ -24,8 +24,10 @@ class _UserInformationState extends State<UserInformation> {
   var _congome;
   @override
   Widget build(BuildContext context) {
+   //argomenti di navigazione
     final args = ModalRoute.of(context)!.settings.arguments as PlaceTagArg;
     _user = args.currentUser;
+    //connessione al database dell'utente per recuperare i dati da visualizzare
     CollectionReference users = FirebaseFirestore.instance.collection('utenti');
     return FutureBuilder<DocumentSnapshot>(
       future: users.doc(_user.uid).get(),

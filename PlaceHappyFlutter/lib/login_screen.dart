@@ -105,16 +105,15 @@ Future<void> insertTag(Tag tag) async {
     conflictAlgorithm: ConflictAlgorithm.replace,
   );
 }
-
-// A method that retrieves all the dogs from the dogs table.
+//metodo che recupera tutti i luoghi dal database
 Future<List<Place>> places() async {
-  // Get a reference to the database.
+
   final db = await database;
 
-  // Query the table for all The Dogs.
+
   final List<Map<String, dynamic>> maps = await db.query('places');
 
-  // Convert the List<Map<String, dynamic> into a List<Dog>.
+
   return List.generate(maps.length, (i) {
     return Place(
 
@@ -129,15 +128,14 @@ Future<List<Place>> places() async {
   });
 }
 
-// A method that retrieves all the dogs from the dogs table.
+//metodo che recupera tutti i tag dal database
 Future<List<Tag>> tags() async {
-  // Get a reference to the database.
+
   final db = await database;
 
-  // Query the table for all The Dogs.
+
   final List<Map<String, dynamic>> maps = await db.query('tags');
 
-  // Convert the List<Map<String, dynamic> into a List<Dog>.
   return List.generate(maps.length, (i) {
     return Tag(
 
@@ -148,64 +146,68 @@ Future<List<Tag>> tags() async {
   });
 }
 
+//metodo che modifica un luogo nel database dato il nome
 Future<void> updatePlace(Place place) async {
-  // Get a reference to the database.
+
   final db = await database;
 
-  // Update the given Dog.
+
   await db.update(
     'places',
     place.toMap(),
-    // Ensure that the Dog has a matching id.
+
     where: 'name = ?',
-    // Pass the Dog's id as a whereArg to prevent SQL injection.
+
     whereArgs: [place.name],
   );
 }
 
+//metodo che modifica un tag nel database dato il nome
 Future<void> updateTag(Tag tag) async {
-  // Get a reference to the database.
+
   final db = await database;
 
-  // Update the given Dog.
+
   await db.update(
     'places',
     tag.toMap(),
-    // Ensure that the Dog has a matching id.
+
     where: 'tagName = ?',
-    // Pass the Dog's id as a whereArg to prevent SQL injection.
+
     whereArgs: [tag.tagName],
   );
 }
 
+//metodo che elimina un luogo dal db
 Future<void> deletePlace(String name) async {
-  // Get a reference to the database.
+
   final db = await database;
 
-  // Remove the Dog from the database.
+
   await db.delete(
     'places',
-    // Use a `where` clause to delete a specific dog.
+
     where: 'name = ?',
-    // Pass the Dog's id as a whereArg to prevent SQL injection.
+
     whereArgs: [name],
   );
 }
 
+//metodo che elimina un tag dal db
 Future<void> deleteTag(String tagName) async {
-  // Get a reference to the database.
+
   final db = await database;
 
-  // Remove the Dog from the database.
+
   await db.delete(
     'tags',
-    // Use a `where` clause to delete a specific dog.
+
     where: 'tagName = ?',
-    // Pass the Dog's id as a whereArg to prevent SQL injection.
+
     whereArgs: [tagName],
   );
 }
-// Create a Dog and add it to the dogs table
+//creazione di istanze di luoghi e tag da inserire nel db
 var giardini_pubblici  = Place(
     name: 'Giardini Pubblici',
     description: 'I Giardini Pubblici di Jesi sono da sempre un luogo di incontro per persone di ogni età. Ci sono infatti giochi per bambini, come ad esempio scivoli,  altalene, una pista da pattinaggio, ma si possono trovare anche tavoli da ping pong, scacchi e molto altro. All\'interno è situato anche un bar denominato \'Lo Sbarello\', che offre pizza, gelati, ma anche drink e aperitivi, sempre con musica annessa.',
@@ -264,6 +266,7 @@ var d = Tag(tagName: 'Cibo', place: 'Giardini Pubblici');
     var l = Tag(tagName: 'Drink', place: 'Hemingway Cafè');
     var m = Tag(tagName: 'Musica', place: 'Hemingway Cafè');
 
+//inserimento di luoghi e tag nel db
 await insertPlace(giardini_pubblici);
 await insertPlace(birreria_agostino);
 await insertPlace(circolo_cittadino);
@@ -281,11 +284,14 @@ await insertTag(b);
     await insertTag(l);
     await insertTag(l);
     await insertTag(m);
+
+    //recupero dei dati dal db
 _placesLogin = await places();
 _tagsLogin = await tags();
 
 }
 
+//costruttore che inserisce e recupera dati dal db, e poi inizializza flutterfire
 _LoginState () {
     ao();
     initializeFlutterFire();
@@ -336,10 +342,12 @@ _LoginState () {
               child: ElevatedButton(
                 onPressed: () async {
                   try {
+                    //prova a fare login con email e password inseriti dall'utnete
                     UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
                         email: myControllerEmail.text,
                         password: myControllerPass.text
                     );
+                    //se email e password validi naviga verso la home page
                     if (userCredential.user != 0)
                       {
                         var currentUser = FirebaseAuth.instance.currentUser;
@@ -350,6 +358,7 @@ _LoginState () {
                           arguments: PlaceTagArg(_placesLogin, _tagsLogin, currentUser),
                 );
                       }
+                    //toast nel caso di dati inseriti non corretti
                   } on FirebaseAuthException catch (e) {
                       Fluttertoast.showToast(
                           msg: e.code,
@@ -375,22 +384,8 @@ _LoginState () {
               decoration: BoxDecoration(
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
               child: ElevatedButton(
-                onPressed: () async {
-                  try {
-                    UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                        email: "barry.allen@example.com",
-                        password: "SuperSecretPassword!"
-                    );
-                  } on FirebaseAuthException catch (e) {
-                    if (e.code == 'weak-password') {
-                      print('The password provided is too weak.');
-                    } else if (e.code == 'email-already-in-use') {
-                      print('The account already exists for that email.');
-                    }
-                  } catch (e) {
-                    print(e);
-                  }
-
+                onPressed: ()  {
+                  //navigazione verso la schermata di creazione account
                   Navigator.pushNamed(
                   context,
                   '/createaccount', arguments: PlaceTagArg(_placesLogin, _tagsLogin, currentUser)

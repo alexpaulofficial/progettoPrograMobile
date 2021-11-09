@@ -1,3 +1,4 @@
+//classe che mappa nel db la tabella dei tag
 class Tag {
 
   final String tagName;
