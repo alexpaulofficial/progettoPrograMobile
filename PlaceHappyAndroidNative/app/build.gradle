@@ -5,6 +5,7 @@ plugins {
     id("com.google.secrets_gradle_plugin") version "0.6"
     id 'kotlin-kapt'
    id "androidx.navigation.safeargs.kotlin"
+
 }
 
 android {
@@ -38,8 +39,11 @@ android {
         viewBinding true
         dataBinding true
     }
+    testOptions.unitTests.includeAndroidResources = true
 }
 dependencies {
+
+
     implementation 'com.facebook.android:facebook-android-sdk:5.+'
 
     implementation 'androidx.activity:activity-ktx:1.2.3'
@@ -61,7 +65,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation 'com.google.android.gms:play-services-maps:17.0.1'
     implementation platform('com.google.firebase:firebase-bom:28.4.0')
     implementation 'com.google.firebase:firebase-analytics-ktx'
@@ -73,6 +77,18 @@ dependencies {
     //room database
     implementation "androidx.room:room-runtime:2.3.0"
     implementation 'androidx.room:room-ktx:2.3.0'
+    androidTestImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
     kapt "androidx.room:room-compiler:2.3.0"
     testImplementation "androidx.room:room-testing:2.3.0"
+    // Required -- JUnit 4 framework
+    testImplementation("junit:junit:4.12")
+    // Optional -- Robolectric environment
+    testImplementation('androidx.test:core:1.4.0')
+    // Optional -- Mockito framework
+    testImplementation("org.mockito:mockito-core:1.10.19")
+    androidTestImplementation('androidx.test.uiautomator:uiautomator:2.2.0')
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.4.0')
+    androidTestImplementation('androidx.test:runner:1.4.0')
+    androidTestImplementation('androidx.test:rules:1.4.0')
+    testImplementation 'org.junit.platform:junit-platform-commons:1.5.2'
 }

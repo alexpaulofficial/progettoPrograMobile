@@ -13,6 +13,7 @@ import 'package:place_happy/plac_tag_arg.dart';
 import 'package:place_happy/tag.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:place_happy/place.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CreateAccount extends StatefulWidget {
   @override
@@ -55,6 +56,19 @@ class _CreateAccountState extends State<CreateAccount> {
   }
   @override
   Widget build(BuildContext context) {
+    CollectionReference users = FirebaseFirestore.instance.collection('utenti');
+
+    Future<void> addUser (String uid) {
+      // Call the user's CollectionReference to add a new user
+      return users
+          .doc(uid)
+        .set({
+        'nome': myControllerNome.text, // John Doe
+        'cognome': myControllerCognome.text, // Stokes and Sons
+      })
+          .then((value) => print("User Added"))
+          .catchError((error) => print("Failed to add user: $error"));
+    }
     final args = ModalRoute.of(context)!.settings.arguments as PlaceTagArg;
     _places = args.places;
     _tags = args.tags;
@@ -71,6 +85,7 @@ class _CreateAccountState extends State<CreateAccount> {
         padding:  EdgeInsets.only(
             left: 15.0, right: 15.0, top: 15, bottom: 0),
         child: TextField(
+          controller: myControllerNome,
           decoration: InputDecoration(
             border: OutlineInputBorder(),
             labelText: 'Nome',
@@ -82,6 +97,7 @@ class _CreateAccountState extends State<CreateAccount> {
         padding:  EdgeInsets.only(
             left: 15.0, right: 15.0, top: 15, bottom: 0),
         child: TextField(
+          controller: myControllerCognome,
           decoration: InputDecoration(
             border: OutlineInputBorder(),
             labelText: 'Cognome',
@@ -93,6 +109,7 @@ class _CreateAccountState extends State<CreateAccount> {
     padding:  EdgeInsets.only(
     left: 15.0, right: 15.0, top: 15, bottom: 0),
     child: TextField(
+      controller: myControllerEmail,
     decoration: InputDecoration(
     border: OutlineInputBorder(),
     labelText: 'Email',
@@ -104,7 +121,7 @@ class _CreateAccountState extends State<CreateAccount> {
     left: 15.0, right: 15.0, top: 15, bottom: 25),
     //padding: EdgeInsets.symmetric(horizontal: 15),
     child: TextField(
-
+    controller: myControllerPass,
     obscureText: true,
     decoration: InputDecoration(
     border: OutlineInputBorder(),
@@ -120,13 +137,15 @@ class _CreateAccountState extends State<CreateAccount> {
         child: ElevatedButton(
           onPressed: () async {
             try {
-              UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+              UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
                   email: myControllerEmail.text,
                   password: myControllerPass.text
               );
               if (userCredential.user != 0)
               {
                 var currentUser = FirebaseAuth.instance.currentUser;
+
+                addUser(currentUser!.uid);
                 Navigator.pushNamed(
                     context,
                     '/home',

@@ -17,6 +17,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+
 
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
@@ -28,9 +30,22 @@ AndroidNotificationDetails('1', 'Luogo Vicino',
     ticker: 'ticker');
 const NotificationDetails platformChannelSpecifics =
 NotificationDetails(android: androidPlatformChannelSpecifics);
-void main () {
-  runApp(const MyApp());
+
+void printHello() async {
+  await flutterLocalNotificationsPlugin.show(
+      0, 'Sei passato vicino a molti bei luoghi d''interesse',
+      'Entra nell''app per tutte le info',
+      platformChannelSpecifics,
+      payload: 'item x');
 }
+
+void main () async {
+  runApp(const MyApp());
+  await AndroidAlarmManager.initialize();
+  Future.delayed(const Duration(milliseconds: 100));
+  final int helloAlarmID = 0;
+  await AndroidAlarmManager.periodic(Duration(minutes: 10), helloAlarmID, printHello, wakeup: true, allowWhileIdle: true);
+  }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -133,41 +148,6 @@ class _MyHomePageState extends State<MyHomePage> {
           }});
 
   }
-  Future<Position> _determinePosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-// Test if location services are enabled.
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
-      return Future.error('Location permissions are denied');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.deniedForever) {
-        // Permissions are denied forever, handle appropriately.
-        return Future.error('Location permissions are denied');
-      }
-
-      if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-// When we reach here, permissions are granted and we can
-// continue accessing the position of the device.
-    return await Geolocator.getCurrentPosition();
-  }
 
   void onTabTapped(int index) {
     setState(() {
@@ -257,7 +237,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget bodySetter() {
-    _determinePosition();
     if (_place == true) {
       if(_tagName!= ''){ return Column(
 
@@ -285,14 +264,14 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     if (_currentIndex == 0) {
-      StreamSubscription<Position> positionStream = Geolocator
+/*      StreamSubscription<Position> positionStream = Geolocator
           .getPositionStream().listen(
               (Position position) {
             print(position == null ? 'Unknown' : position.latitude.toString() +
                 ', ' + position.longitude.toString());
             lat = position.latitude;
             long = position.longitude;
-          });
+          });*/
       for (var i = 0 ; i < _places.length; i++ ) {
         _markers.add(
             Marker(

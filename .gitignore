@@ -87,3 +87,5 @@ lint/tmp/
 
 # Android Profiling
 *.hprof
+PlaceHappyAndroidNative/.idea/workspace.xml
+PlaceHappyAndroidNative/.idea/gradle.xml
