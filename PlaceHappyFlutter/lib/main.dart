@@ -31,8 +31,8 @@ NotificationDetails(android: androidPlatformChannelSpecifics);
 
 void printHello() async {
   await flutterLocalNotificationsPlugin.show(
-      0, 'Sei passato vicino a molti bei luoghi d''interesse',
-      'Entra nell''app per tutte le info',
+      0, 'Scopri i luoghi di interesse nelle vicinanze!',
+      'Entra per tutte le info',
       platformChannelSpecifics,
       payload: 'item x');
 }
@@ -42,7 +42,7 @@ void main () async {
   await AndroidAlarmManager.initialize();
   Future.delayed(const Duration(milliseconds: 100));
   final int helloAlarmID = 0;
-  await AndroidAlarmManager.periodic(Duration(minutes: 10), helloAlarmID, printHello, wakeup: true, allowWhileIdle: true);
+  await AndroidAlarmManager.periodic(Duration(minutes: 30), helloAlarmID, printHello, wakeup: true, allowWhileIdle: true);
   }
 
 class MyApp extends StatelessWidget {
@@ -78,7 +78,45 @@ class _MyHomePageState extends State<MyHomePage> {
   final Future<FirebaseApp> _initialization = Firebase.initializeApp();
   bool _initialized = false;
   bool _error = false;
+  /// Determine the current position of the device.
+  ///
+  /// When the location services are not enabled or permissions
+  /// are denied the `Future` will return an error.
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
 
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    return await Geolocator.getCurrentPosition();
+  }
   //funzione asincrona che inizializza flutter
   void initializeFlutterFire() async {
     try {
@@ -106,6 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _MyHomePageState () {
     db();
+    _getCurrentLocation();
     initializeFlutterFire();
 
   }
@@ -124,7 +163,16 @@ class _MyHomePageState extends State<MyHomePage> {
     target: LatLng(43.51886, 13.227781),
     zoom: 16,
   );
-  void notification() async {
+  _getCurrentLocation() {
+    Geolocator
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best, forceAndroidLocationManager: true)
+        .then((Position position) {
+      setState(() {
+        var _currentPosition = position;
+      });
+    }).catchError((e) {
+      print(e);
+    });
   }
   void db() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
