@@ -1,4 +1,5 @@
 package com.aleciro.placehappy.database
+
 import androidx.room.*
 
 @Dao

@@ -32,14 +32,15 @@ class TagsAdapter(val data: MutableList<String>) : RecyclerView.Adapter<TagsAdap
         )
         val holder = MyViewHolder(layout)
         holder.row.setOnClickListener {
-        val action = TagsFragmentDirections.actionTagToLuoghi(holder.row.findViewById<TextView>(R.id.nomeTag).text.toString())
+            val action =
+                TagsFragmentDirections.actionTagToLuoghi(holder.row.findViewById<TextView>(R.id.nomeTag).text.toString())
             parent.findNavController().navigate(action)
         }
         return holder
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.nome.text =   data.get(position)
+        holder.nome.text = data.get(position)
 
 
     }

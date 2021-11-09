@@ -13,8 +13,8 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 
-
-class LoginActivity: AppCompatActivity() {
+// Questa activity serve sia per loggarsi che per creare un nuovo account
+class LoginActivity : AppCompatActivity() {
     // [START declare_auth]
     private lateinit var auth: FirebaseAuth
     // [END declare_auth]
@@ -32,7 +32,7 @@ class LoginActivity: AppCompatActivity() {
         var textEmail = findViewById<TextInputEditText>(R.id.text_email)
         var textPassword = findViewById<TextInputEditText>(R.id.text_password)
 
-       btnLogin.setOnClickListener {
+        btnLogin.setOnClickListener {
 
             val email = textEmail.text.toString()
             val password = textPassword.text.toString()
@@ -58,58 +58,62 @@ class LoginActivity: AppCompatActivity() {
         }
     }
 
-    // [START on_start_check_user]
+    // Controlla se l'utente è già loggato
     public override fun onStart() {
         super.onStart()
         // Check if user is signed in (non-null) and update UI accordingly.
         val currentUser = auth.currentUser
-        if(currentUser != null){
+        if (currentUser != null) {
             reload();
         }
     }
-    // [END on_start_check_user]
 
+    // Crea account (funzione standard di Firebase)
     private fun createAccount(nome: String, cognome: String, email: String, password: String) {
-        // [START create_user_with_email]
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
+                    // Se non ci sono problemi viene aggiornata l'interfaccia e si passa l'utente creato
+                    // (si entra subito nella home)
                     Log.d(TAG, "createUserWithEmail:success")
                     val user = auth.currentUser
                     writeUserToDb(nome, cognome, user!!.uid)
                     updateUI(user)
                 } else {
-                    // If sign in fails, display a message to the user.
+                    // Se ci sono errori si visualizza un Toast di errore
                     Log.w(TAG, "createUserWithEmail:failure", task.exception)
-                    Toast.makeText(baseContext, "Authentication failed.",
-                        Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        baseContext, "Authentication failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     updateUI(null)
                 }
             }
-        // [END create_user_with_email]
     }
 
+    // Entra nell'account (funzione standard di Firebase)
     private fun signIn(email: String, password: String) {
-        // [START sign_in_with_email]
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
+                    // Se non ci sono problemi viene aggiornata l'interfaccia e si passa l'utente loggato
                     Log.d(TAG, "signInWithEmail:success")
                     val user = auth.currentUser
                     updateUI(user)
                 } else {
-                    // If sign in fails, display a message to the user.
+                    // Se ci sono errori si visualizza un Toast di errore
                     Log.w(TAG, "signInWithEmail:failure", task.exception)
-                    Toast.makeText(baseContext, "Authentication failed.",
-                        Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        baseContext, "Authentication failed (wrong email/password)",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     updateUI(null)
                 }
             }
-        // [END sign_in_with_email]
     }
 
+    // Funzione che aggiorna la UI: se tutto è andato a buon fine si passa alla
+    // BottomNavigation
     private fun updateUI(user: FirebaseUser?) {
         val intent = Intent(this, BottomNavigation::class.java)
         val b = Bundle()
@@ -125,8 +129,10 @@ class LoginActivity: AppCompatActivity() {
     }
 
     private fun reload() {
-        Toast.makeText(baseContext, "Reload",
-            Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            baseContext, "Reload",
+            Toast.LENGTH_SHORT
+        ).show()
         updateUI(Firebase.auth.currentUser)
     }
 

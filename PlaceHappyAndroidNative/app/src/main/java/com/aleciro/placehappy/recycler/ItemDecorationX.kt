@@ -9,7 +9,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.aleciro.placehappy.R
 
-class ItemDecorationX (context: Context, @DrawableRes dividerRes: Int) : RecyclerView.ItemDecoration() {
+class ItemDecorationX(context: Context, @DrawableRes dividerRes: Int) : RecyclerView.ItemDecoration() {
 
     private val mDivider: Drawable = ContextCompat.getDrawable(context, R.drawable.line_divider)!!
 

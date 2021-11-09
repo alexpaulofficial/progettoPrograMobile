@@ -1,7 +1,6 @@
 package com.aleciro.placehappy.notifications;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,9 +12,11 @@ import androidx.core.app.NotificationCompat;
 import androidx.navigation.NavDeepLinkBuilder;
 import com.aleciro.placehappy.*;
 
+// Classe che si occupa della inizializzazione e della gestione
+// del canale delle notifiche
 public class NotificationHelper extends ContextWrapper {
-    public static final String channelID = "channelID";
-    public static final String channelName = "Channel Name";
+    public static final String channelID = "Canale 1";
+    public static final String channelName = "Luogo nelle vicinanze";
 
     private NotificationManager mManager;
 

@@ -8,13 +8,13 @@ interface TagDao {
     suspend fun getAll(): MutableList<Tag>
 
     @Query("SELECT * FROM tags WHERE tagName=:name")
-     suspend fun getPlacesByTag(name: String) : MutableList<Tag>
+    suspend fun getPlacesByTag(name: String): MutableList<Tag>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-     suspend fun insert(tags: Array<Tag>)
+    suspend fun insert(tags: Array<Tag>)
 
     @Update
-     suspend fun update(tag: Tag)
+    suspend fun update(tag: Tag)
 
     @Delete
     suspend fun delete(tag: Tag)

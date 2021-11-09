@@ -1,23 +1,19 @@
 package com.aleciro.placehappy
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
 import com.google.firebase.auth.FirebaseAuth
 
-
+// Questa è l'activity che parte come principale
+// Eventualmente se l'utente fosse loggato istanzia FirebaseAuth
+// altrimenti si passa a LoginActivity
 class FirstActivity : AppCompatActivity() {
     private var mAuth: FirebaseAuth? = null
     val LOGIN_REQUEST = 101
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
 
         setContentView(R.layout.activity_first)
         val preferences = getSharedPreferences("login", MODE_PRIVATE)

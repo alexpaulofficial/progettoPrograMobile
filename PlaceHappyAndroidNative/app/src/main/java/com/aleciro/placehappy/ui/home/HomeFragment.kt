@@ -16,16 +16,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment.findNavController
 import androidx.navigation.fragment.findNavController
-import com.aleciro.placehappy.PlaceFragment
 import com.aleciro.placehappy.R
 import com.aleciro.placehappy.database.Place
 import com.aleciro.placehappy.database.Tag
@@ -42,17 +37,18 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.coroutines.launch
 
+// Fragment Home con la mappa dove vengono anche inseriti i dati nel DB
 class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener,
-    GoogleMap.OnMyLocationClickListener, ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnMarkerClickListener,
+    GoogleMap.OnMyLocationClickListener, ActivityCompat.OnRequestPermissionsResultCallback,
+    GoogleMap.OnMarkerClickListener,
     GoogleMap.OnInfoWindowClickListener {
 
-
+    // Permessi per la localizzazione
     private val MY_PERMISSION_FINE_LOCATION = 101
     val viewModel: TouristViewModel by viewModels()
 
-    private lateinit var homeViewModel: HomeViewModel
     private var permissionDenied = false
-    private lateinit var mMap : GoogleMap
+    private lateinit var mMap: GoogleMap
     private var mapReady = false
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -61,20 +57,18 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        homeViewModel =
-            ViewModelProvider(this).get(HomeViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_home, container, false)
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.requireContext().applicationContext)
 
-
+        // Mappa di Google Maps
         mapFragment.getMapAsync(this)
-        mapFragment.getMapAsync {
-            googleMap -> mMap = googleMap
+        mapFragment.getMapAsync { googleMap ->
+            mMap = googleMap
             mapReady = true
         }
 
-
+        // Aggiunta luoghi DB
         viewModel.addPlace(
             arrayOf(
                 Place(
@@ -88,8 +82,13 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
                 ),
 
                 Place(
-                    "Birreria Sant'Agostino", "La Birreria Sant'Agostino, situata nel cuore del centro di Jesi, è specializzata nelle birre artigianali. Qui si possono trovare infatti birre di ogni tipologia e nazionalità. Ci sono molte birre speciali belghe, tedesche, irlandesi, ma sicuramente anche le più classiche, come la Weiss e la Guinness. Il luogo è fornito  di tavoli sia all'aperto, sia sotto un loggiato, con riscaldamento per l'inverno. Possibilità di aperitivi.", "Birreria fornita di varie birre artigianali.",
-                             " ", 43.522838388573014, 13.244360149177467, "birreria_agostino"
+                    "Birreria Sant'Agostino",
+                    "La Birreria Sant'Agostino, situata nel cuore del centro di Jesi, è specializzata nelle birre artigianali. Qui si possono trovare infatti birre di ogni tipologia e nazionalità. Ci sono molte birre speciali belghe, tedesche, irlandesi, ma sicuramente anche le più classiche, come la Weiss e la Guinness. Il luogo è fornito  di tavoli sia all'aperto, sia sotto un loggiato, con riscaldamento per l'inverno. Possibilità di aperitivi.",
+                    "Birreria fornita di varie birre artigianali.",
+                    " ",
+                    43.522838388573014,
+                    13.244360149177467,
+                    "birreria_agostino"
                 ),
 
                 Place(
@@ -138,7 +137,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
                 Tag("Musica", "Hemingway Cafè"),
 
 
-            )
+                )
         )
 
         return root
@@ -146,45 +145,54 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //Notifications
-        val minutes = 1
 
+        // Tempo in cui viene eseguito l'Alert (non corretto al 100% perchè
+        // Android gestisce gli Alarm un po' come vuole ogni tanto...)
+        val minutes = 5
+
+        // Inizializzazione Alarm Manager (sostanzialmente setta una sveglia
+        // che dopo un certo periodo fa partire il PrimaryIntent che viene
+        // poi ricevuto dall'AlertReceiver)
         var alarmMgr: AlarmManager?
         alarmMgr = this.context!!.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         var primaryIntent = Intent(this.context, AlertReceiver::class.java)
 
+        // Bundle da passare all'AlertReceiver
         var luoghiNotifica = Bundle()
-        //var placeVuoto = Place("","","","",0.1,0.1,"")
+
         var listaluoghi = mutableListOf<Place>()
         lifecycleScope.launch {
             viewModel.getAllPlaces()
             listaluoghi = viewModel.placesList
-        var i = 0
-        for (luogo in listaluoghi) {
-            luoghiNotifica.putString(i.toString() + "NAME", luogo.name)
-            luoghiNotifica.putDouble(i.toString() + "LAT", luogo.latitude)
-            luoghiNotifica.putDouble(i.toString() + "LONG", luogo.longitude)
-            /*var arrayCoordinate = DoubleArray(2)
-            arrayCoordinate[0] = luogo.latitude
-            arrayCoordinate[0] = luogo.longitude
-            luoghiNotifica.putDoubleArray(luogo.name, arrayCoordinate)*/
-            i++
-        }
-        Log.d("BUNDLE", "BundleLuoghi = " + luoghiNotifica.toString())
-        primaryIntent.putExtra("Luoghi", luoghiNotifica)
-        var pendingIntent = primaryIntent.let { intent ->
-            PendingIntent.getBroadcast(context, 0, intent.putExtra("Luoghi", luoghiNotifica), 0)
-        }
-        alarmMgr?.setInexactRepeating(
-            AlarmManager.ELAPSED_REALTIME,
-            SystemClock.elapsedRealtime() + minutes * 60 * 1000,
-            (minutes * 60 * 1000).toLong(),
-            pendingIntent
+            var i = 0
+            // I luoghi vengono passsati con un formato specifico:
+            // id luogo+NAME+nomeLuogo
+            // id luogo+LAT+latitudineLuogo
+            // id luogo+LONG+longitudineLuogo
+            // Ciò è stato fato dato che i luoghi vengono trattati in modo "asincrono"
+            for (luogo in listaluoghi) {
+                luoghiNotifica.putString(i.toString() + "NAME", luogo.name)
+                luoghiNotifica.putDouble(i.toString() + "LAT", luogo.latitude)
+                luoghiNotifica.putDouble(i.toString() + "LONG", luogo.longitude)
+                i++
+            }
+            Log.d("BUNDLE", "BundleLuoghi = " + luoghiNotifica.toString())
+            primaryIntent.putExtra("Luoghi", luoghiNotifica)
+            // L'intent che viene lanciato
+            var pendingIntent = primaryIntent.let { intent ->
+                PendingIntent.getBroadcast(context, 0, intent.putExtra("Luoghi", luoghiNotifica), 0)
+            }
+            alarmMgr?.setInexactRepeating(
+                AlarmManager.ELAPSED_REALTIME,
+                SystemClock.elapsedRealtime() + minutes * 60 * 1000,
+                (minutes * 60 * 1000).toLong(),
+                pendingIntent
 
-        )
-    }
+            )
+        }
     }
 
+    // Una volta caricata la mappa si aggiungono i marcatori
     override fun onMapReady(p0: GoogleMap) {
         // val xxx: MainActivity = activity as MainActivity
         p0.setOnInfoWindowClickListener(this)
@@ -203,79 +211,87 @@ class HomeFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMyLocationButto
         p0.setOnMyLocationClickListener(this)
         enableMyLocation()
 
-
-
-        if (ActivityCompat.checkSelfPermission(this.requireContext().applicationContext,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(
+                this.requireContext().applicationContext,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             p0.isMyLocationEnabled = true
-        }
-        else {//condition for Marshmello and above
+        } else {//condition for Marshmello and above
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), MY_PERMISSION_FINE_LOCATION)
             }
         }
         p0.setOnMarkerClickListener(this)
     }
+
     override fun onMarkerClick(p0: Marker?) = false
 
+    // Quando si clicca nell'infoWindow del marcatore si accede alla pagina del singolo luogo
     override fun onInfoWindowClick(marker: Marker) {
         val action = HomeFragmentDirections.actionNavigationHomeToPlaceFragment(marker.title)
         this.findNavController().navigate(action)
     }
 
+    // Controlli vari per la richiesta
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         when (requestCode) {
             MY_PERMISSION_FINE_LOCATION -> if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {//permission to access location grant
-                if (ActivityCompat.checkSelfPermission(this.requireContext().applicationContext,
-                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(
+                        this.requireContext().applicationContext,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
                     mMap.isMyLocationEnabled = true
                 }
             }
             //permission to access location denied
             else {
-                Toast.makeText(this.requireContext().applicationContext, "This app requires location permissions to be granted", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this.requireContext().applicationContext,
+                    "This app requires location permissions to be granted",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
+
     /**
      * Enables the My Location layer if the fine location permission has been granted.
      */
     private fun enableMyLocation() {
         if (!::mMap.isInitialized) return
-        if (ContextCompat.checkSelfPermission(this.requireContext().applicationContext, Manifest.permission.ACCESS_FINE_LOCATION)
-            == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this.requireContext().applicationContext,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+            == PackageManager.PERMISSION_GRANTED
+        ) {
             mMap.isMyLocationEnabled = true
         } else {
             // Permission to access the location is missing. Show rationale and request permission
             ActivityCompat.requestPermissions(
-                this.requireActivity().parent, Array<String>(1){Manifest.permission.ACCESS_FINE_LOCATION},
+                this.requireActivity().parent, Array<String>(1) { Manifest.permission.ACCESS_FINE_LOCATION },
                 LOCATION_PERMISSION_REQUEST_CODE
             )
 
         }
     }
 
+    // Non fa nulla
     override fun onMyLocationButtonClick(): Boolean {
-        Toast.makeText(this.requireContext().applicationContext, "MyLocation button clicked", Toast.LENGTH_SHORT).show()
-        // Return false so that we don't consume the event and the default behavior still occurs
-        // (the camera animates to the user's current position).
         return false
     }
 
     override fun onMyLocationClick(location: Location) {
-        Toast.makeText(this.requireContext().applicationContext, "Current location:\n$location", Toast.LENGTH_LONG).show()
+        Toast.makeText(this.requireContext().applicationContext, "Current location:\n$location", Toast.LENGTH_LONG)
+            .show()
     }
 
     companion object {
-        /**
-         * Request code for location permission request.
-         *
-         * @see .onRequestPermissionsResult
-         */
+
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
-
-
 }

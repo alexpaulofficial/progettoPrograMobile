@@ -5,10 +5,8 @@ import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
 
-
-
 @Entity(tableName = "places")
-data class Place  (
+data class Place(
     @PrimaryKey(autoGenerate = false) val name: String,
     val description: String,
     val shortDescr: String,
@@ -18,19 +16,18 @@ data class Place  (
     val image: String,
 
 
+    )
+
+@Entity(
+    tableName = "tags", primaryKeys = arrayOf("tagName", "place"), foreignKeys = [
+        (ForeignKey(
+            entity = Place::class,
+            parentColumns = ["name"],
+            childColumns = ["place"],
+            onDelete = ForeignKey.CASCADE
+        ))]
 )
-
-
-
-@Entity(tableName = "tags", primaryKeys = arrayOf("tagName", "place"),foreignKeys=[
-    (ForeignKey(
-        entity=Place::class,
-        parentColumns=["name"],
-        childColumns=["place"],
-        onDelete= ForeignKey.CASCADE
-    ))]
-)
-data class Tag (
+data class Tag(
 
     val tagName: String,
     val place: String

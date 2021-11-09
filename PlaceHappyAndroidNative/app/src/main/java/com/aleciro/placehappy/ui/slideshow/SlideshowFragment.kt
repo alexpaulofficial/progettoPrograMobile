@@ -11,12 +11,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.aleciro.placehappy.FirstActivity
-import com.aleciro.placehappy.LoginActivity
 import com.aleciro.placehappy.R
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 
+// Fragment dove vengono visualizzate le info sull'account e dove si
+// può fare il logout
 class SlideshowFragment : Fragment() {
 
     private lateinit var slideshowViewModel: SlideshowViewModel
@@ -35,6 +34,7 @@ class SlideshowFragment : Fragment() {
         })
         var btnLogout: Button = root.findViewById(R.id.buttonLogout)
 
+        // Logout con Firebase
         btnLogout.setOnClickListener {
             FirebaseAuth.getInstance().signOut();
 
